@@ -75,6 +75,23 @@
   .gsel .ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
   .gsel .gname{font-weight:700;font-size:14px;color:#eaeaf2}
   .gsel .gsub{font-size:11.5px;color:#8b8b9e}
+  .convo{position:relative}
+  .convo-del{position:absolute;top:50%;transform:translateY(-50%);right:12px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(255,60,90,.14);border:1px solid rgba(255,60,90,.4);color:#ff8fa3;cursor:pointer;
+    opacity:0;transition:.15s;z-index:2}
+  .convo:hover .convo-del{opacity:1}
+  .convo-body{padding-right:30px}
+  @media (max-width:820px){ .convo-del{opacity:.85} }
+  .convo-del:hover{background:rgba(255,60,90,.3);color:#fff}
+  .thread-menu{flex:0 0 auto;width:32px;height:32px;border-radius:10px;border:1px solid #2c2c3d;background:#171722;
+    color:#b9b9cc;font-size:16px;font-weight:800;cursor:pointer;display:grid;place-items:center;line-height:1}
+  .thread-menu:hover{background:#22222f;color:#fff}
+  .menu-btn{width:100%;padding:13px;border-radius:13px;border:1px solid #262636;background:#171722;color:#eaeaf2;
+    font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;text-align:center;transition:.15s}
+  .menu-btn:hover{background:#20202e}
+  .menu-btn.danger{border-color:rgba(255,60,90,.45);background:rgba(255,60,90,.12);color:#ff8fa3}
+  .menu-btn.danger:hover{background:rgba(255,60,90,.22);color:#fff}
+  .menu-btn.ghost{background:transparent;border-color:#2a2a3a;color:#9a9ab0}
   .kick-btn{margin-left:auto;flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,60,90,.45);
     background:rgba(255,60,90,.12);color:#ff8fa3;font-size:14px;cursor:pointer;display:grid;place-items:center;transition:.15s}
   .kick-btn:hover{background:rgba(255,60,90,.25);color:#fff}
@@ -391,7 +408,9 @@
         <div class="top-sub" id="topSub">Bağlanıyor…</div>
       </div>
       <div class="top-right">
+        <button class="thread-menu hidden" id="threadMenu" type="button" title="Sohbet seçenekleri">⋯</button>
         <span class="online-pill" id="onlinePill"><i></i><b id="onlineNum">0</b>&nbsp;çevrimiçi</span>
+        <button class="thread-menu hidden" id="clearFeed" type="button" title="Canlı akışı temizle">🧹</button>
         <span class="persist hidden" id="adminTop" title="Yönetici" style="color:#ffd60a"></span>
         <span class="persist" id="persistBadge" data-on="0" title="Kontrol ediliyor…">💾</span>
         <button class="mini-ava" id="myAva">😎</button>
@@ -504,6 +523,15 @@
   </div>
 </div>
 
+<!-- ===================== SOHBET MENÜSÜ ===================== -->
+<div class="backdrop hidden" id="menuBackdrop">
+  <div class="sheet" style="max-width:380px;padding:20px">
+    <button class="sheet-x" id="menuClose" type="button">✕</button>
+    <div class="sheet-name" id="menuTitle" style="margin:2px 0 16px;font-size:18px">Sohbet</div>
+    <div id="menuActions" style="display:flex;flex-direction:column;gap:9px"></div>
+  </div>
+</div>
+
 <!-- ===================== GRUP OLUŞTUR ===================== -->
 <div class="backdrop hidden" id="groupBackdrop">
   <div class="sheet" style="max-width:460px">
@@ -562,6 +590,7 @@
     trash: '<svg viewBox="0 0 24 24" style="width:13px;height:13px;display:inline-block;vertical-align:-2px"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/></svg>',
     pin: '<svg class="pin-ico" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   };
+  const TRASH_SVG = '<svg viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/></svg>';
   const BAN = '<svg viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6 18.4 18.4"/></svg>';
   const CROWN = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-2px"><path d="M3 8.5 7.5 12 12 5l4.5 7L21 8.5 19 19H5L3 8.5Z"/><path d="M5 19h14"/></svg>';
   const PENCIL = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;display:inline-block"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -750,6 +779,20 @@
 
     socket.on('toast:msg', ({ message }) => toast(message));
 
+    socket.on('global:clear', () => {
+      $('#feed').innerHTML = '';
+      state.msgCounts.clear();
+      toast('🧹 Akış temizlendi');
+      renderPeople();
+    });
+
+    socket.on('dm:removed', ({ peerId, by }) => {
+      state.convos.delete(peerId);
+      if (state.activeDm === peerId) { state.activeDm = null; syncDmView(); }
+      renderDmList(); renderPeople();
+      if (by && state.me && by !== state.me.id) toast('ℹ️ Bir sohbet kaldırıldı');
+    });
+
     socket.on('kicked', ({ by }) => {
       store.del('st_auth'); store.del('st_profile'); store.del('st_uid');
       alert('⛔ Yönetici (' + (by || 'yönetici') + ') tarafından sohbetten çıkarıldın.');
@@ -797,6 +840,8 @@
         adm.innerHTML = user.isAdmin ? CROWN : '';
         adm.title = user.isAdmin ? 'Yönetici: ' + user.name : '';
       }
+      const cf = $('#clearFeed');
+      if (cf) cf.classList.toggle('hidden', !user.isAdmin);
       if (!joined) { joined = true; $('#topSub').textContent = 'Bağlandı · ' + user.name; }
     });
 
@@ -959,7 +1004,9 @@
     row.dataset.scope = scope;
     row.dataset.ts = m.ts;
     const b = bubbleInner(m);
-    const delBtn = mine && !m.deleted
+    const iAmAdminNow = !!(state.me && state.me.isAdmin);
+    const canDelete = (mine || (iAmAdminNow && scope === 'global')) && m.kind !== 'system';
+    const delBtn = canDelete && !m.deleted
       ? `<button class="del-btn" title="Sil" data-del="${esc(m.id)}">${ICONS.trash}</button>`
       : '';
     const isGroupThread = !!(state.activeDm && (state.convos.get(state.activeDm) || {}).isGroup);
@@ -1371,6 +1418,8 @@
     document.querySelectorAll('.bn-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     if (tab === 'messages') syncDmView();
     if (tab !== 'messages') { state.activeDm = null; renderPeople(); }
+    const cf = $('#clearFeed');
+    if (cf) cf.classList.toggle('hidden', !(tab === 'feed' && state.me && state.me.isAdmin));
     updateHeader();
   }
   document.querySelectorAll('.nav-item, .bn-item').forEach((b) => { if (b.dataset.tab) b.onclick = () => setTab(b.dataset.tab); });
@@ -1407,6 +1456,8 @@
     $('#dmThreadWrap').classList.toggle('hidden', !thread);
     $('#composerGlobal').classList.toggle('hidden', state.tab !== 'feed');
     $('#backBtn').classList.toggle('hidden', !(state.tab === 'messages' && thread));
+    const tm = $('#threadMenu');
+    if (tm) tm.classList.toggle('hidden', !(state.tab === 'messages' && thread));
     updateHeader();
   }
 
@@ -1480,6 +1531,12 @@
           <div class="convo-last">${c.isGroup ? '👥 ' + (c.memberCount || 2) + ' üye · ' : ''}${esc(lastText)}</div>
         </div>`;
       btn.querySelector('.ava').style.position = 'relative';
+      const del = document.createElement('span');
+      del.className = 'convo-del';
+      del.title = c.isGroup ? 'Grup seçenekleri' : 'Sohbeti sil';
+      del.innerHTML = c.isGroup ? '⋯' : TRASH_SVG;
+      del.onclick = (e) => { e.stopPropagation(); openConvoMenu(c.peerId); };
+      btn.appendChild(del);
       btn.onclick = () => openDm(c.peerId);
       wrap.appendChild(btn);
     });
@@ -1598,6 +1655,59 @@
     btn.textContent = 'Oluşturuluyor…';
     socket.emit('group:create', { name, uids });
     setTimeout(() => { btn.textContent = 'Grubu oluştur →'; }, 1500);
+  };
+
+  /* ================= sohbet menüsü (sil / çık) ================= */
+  function openConvoMenu(peerId) {
+    const c = state.convos.get(peerId);
+    if (!c) return;
+    const isGroup = !!c.isGroup;
+    const isOwner = !!(c.owner && state.me && c.owner === state.me.id);
+    $('#menuTitle').textContent = (isGroup ? '👥 ' : '💬 ') + (c.peer ? c.peer.name : 'Sohbet');
+    const box = $('#menuActions');
+    box.innerHTML = '';
+    const add = (label, cls, fn) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'menu-btn' + (cls ? ' ' + cls : '');
+      btn.textContent = label;
+      btn.onclick = fn;
+      box.appendChild(btn);
+    };
+    if (isGroup) {
+      add('🚪 Gruptan çık', '', () => {
+        if (!confirm('"' + c.peer.name + '" grubundan çıkmak istiyor musun?')) return;
+        socket.emit('group:leave', { key: peerId });
+        closeConvoMenu();
+        toast('Gruptan çıktın 🚪');
+      });
+      if (isOwner) {
+        add('🗑 Grubu sil (herkesten silinir)', 'danger', () => {
+          if (!confirm('Grup herkesten silinecek. Emin misin?')) return;
+          socket.emit('group:delete', { key: peerId });
+          closeConvoMenu();
+          toast('Grup silindi 🗑');
+        });
+      }
+    } else {
+      add('🗑 Sohbeti sil', 'danger', () => {
+        if (!confirm('Bu sohbeti silmek istiyor musun?\n\nDİKKAT: Karşı taraf da artık göremez.')) return;
+        socket.emit('dm:delete', { peerId });
+        closeConvoMenu();
+        toast('Sohbet silindi 🗑');
+      });
+    }
+    add('Vazgeç', 'ghost', closeConvoMenu);
+    $('#menuBackdrop').classList.remove('hidden');
+  }
+  function closeConvoMenu() { $('#menuBackdrop').classList.add('hidden'); }
+  $('#menuClose').onclick = closeConvoMenu;
+  $('#menuBackdrop').addEventListener('click', (e) => { if (e.target.id === 'menuBackdrop') closeConvoMenu(); });
+  $('#threadMenu').onclick = () => { if (state.activeDm) openConvoMenu(state.activeDm); };
+  $('#clearFeed').onclick = () => {
+    if (!state.me || !state.me.isAdmin) return;
+    if (!confirm('Canlı akıştaki TÜM mesajlar silinecek.\nHerkeste anında temizlenir. Emin misin?')) return;
+    socket.emit('global:clear');
   };
 
   /* ================= davet ================= */

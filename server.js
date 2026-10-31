@@ -502,6 +502,79 @@ io.on('connection', (socket) => {
     scheduleSave();
   });
 
+  /* ---------------- canlı akışı temizle (yönetici) ---------------- */
+  socket.on('global:clear', () => {
+    const me = socket.data.userId;
+    const u = me && db.users[me];
+    if (!u || !u.isAdmin) return socket.emit('err', { message: 'Akışı sadece yönetici temizleyebilir.' });
+    db.global = [];
+    io.emit('global:clear');
+    io.emit('toast:msg', { message: '🧹 Canlı akış yönetici tarafından temizlendi' });
+    scheduleSave();
+  });
+
+  /* ---------------- sohbet sil / gruptan çık ---------------- */
+  socket.on('dm:delete', (payload) => {
+    const me = socket.data.userId;
+    const peerId = clean(payload && payload.peerId, 64);
+    if (!me || !peerId || peerId.startsWith('g:')) return;
+    const found = getThread(me, peerId, false);   // 1-1 sohbetin gerçek anahtarı
+    if (!found) return;
+    const t = found.thread;
+    if (t.isGroup || !Array.isArray(t.uids) || !t.uids.includes(me)) return;
+    const uids = t.uids.slice();
+    delete db.dms[found.key];
+    for (const id of uids) {
+      io.to('u:' + id).emit('dm:removed', { peerId, by: me });
+      io.to('u:' + id).emit('dm:list', dmListFor(id));
+    }
+    scheduleSave();
+  });
+
+  socket.on('group:leave', (payload) => {
+    const me = socket.data.userId;
+    const key = clean(payload && payload.key, 64);
+    const t = key && db.dms[key];
+    if (!t || !t.isGroup || !t.uids.includes(me)) return;
+    const u = db.users[me];
+    t.uids = t.uids.filter((id) => id !== me);
+    if (!t.uids.length) {
+      delete db.dms[key];
+      io.to('u:' + me).emit('dm:removed', { peerId: key, by: me });
+      scheduleSave();
+      return;
+    }
+    if (t.owner === me) t.owner = t.uids[0];
+    const msg = {
+      id: uid(), ts: Date.now(), kind: 'system', from: 'system', to: key,
+      name: 'Sistem', emoji: '🚪', color: '#8b8b9e',
+      text: `${u ? u.name : 'Bir üye'} gruptan ayrıldı`,
+    };
+    t.messages.push(msg);
+    if (t.messages.length > MAX_THREAD) t.messages = t.messages.slice(-MAX_THREAD);
+    io.to('u:' + me).emit('dm:removed', { peerId: key, by: me });
+    for (const id of t.uids) {
+      io.to('u:' + id).emit('dm:new', msg);
+      io.to('u:' + id).emit('dm:list', dmListFor(id));
+    }
+    scheduleSave();
+  });
+
+  socket.on('group:delete', (payload) => {
+    const me = socket.data.userId;
+    const key = clean(payload && payload.key, 64);
+    const t = key && db.dms[key];
+    if (!t || !t.isGroup) return;
+    if (t.owner !== me) return socket.emit('err', { message: 'Grubu sadece kurucusu silebilir.' });
+    const uids = t.uids.slice();
+    delete db.dms[key];
+    for (const id of uids) {
+      io.to('u:' + id).emit('dm:removed', { peerId: key, by: me });
+      io.to('u:' + id).emit('dm:list', dmListFor(id));
+    }
+    scheduleSave();
+  });
+
   /* ---------------- yönetici ---------------- */
   socket.on('admin:kick', (payload) => {
     const me = socket.data.userId;
@@ -669,9 +742,11 @@ io.on('connection', (socket) => {
     const scope = payload && payload.scope === 'dm' ? 'dm' : 'global';
     if (!me || !id) return;
 
+    const mod = db.users[me];
     if (scope === 'global') {
       const i = db.global.findIndex((x) => x.id === id);
-      if (i === -1 || db.global[i].from !== me) return;
+      if (i === -1) return;
+      if (db.global[i].from !== me && !(mod && mod.isAdmin)) return;   // yönetici herkesinkini silebilir
       db.global.splice(i, 1);                       // mesaj tamamen yok oldu
       io.emit('msg:deleted', { scope: 'global', id });
       scheduleSave();
