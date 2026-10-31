@@ -55,6 +55,34 @@
     background:linear-gradient(135deg,var(--pink),#ff5c7a);color:#fff;box-shadow:0 12px 30px rgba(254,44,85,.35);transition:.16s}
   .btn-primary:active{transform:scale(.985)}
   .auth-note{text-align:center;font-size:11.5px;color:#5f5f72;margin-top:14px;line-height:1.6}
+  .auth-tabs{display:flex;gap:8px;margin:0 0 18px;background:#15151f;padding:5px;border-radius:13px;border:1px solid #23232f}
+  .auth-tab{flex:1;padding:10px;border:0;border-radius:9px;background:transparent;color:#9a9ab0;font-family:inherit;
+    font-size:13.5px;font-weight:800;cursor:pointer;transition:.15s}
+  .auth-tab.active{background:linear-gradient(135deg,var(--pink),#ff6a88);color:#fff;box-shadow:0 4px 14px rgba(254,44,85,.35)}
+  .auth-err{margin-top:14px;padding:11px 13px;border-radius:11px;background:rgba(255,60,90,.1);
+    border:1px solid rgba(255,60,90,.4);color:#ff9aa9;font-size:13px;font-weight:600;text-align:center}
+  .auth-ok{background:rgba(46,230,168,.1);border-color:rgba(46,230,168,.4);color:#7cf0c6}
+  .group-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;margin-bottom:10px;
+    border-radius:12px;border:1px dashed rgba(139,92,246,.5);background:rgba(139,92,246,.1);color:#c4b5fd;
+    font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;transition:.15s}
+  .group-btn:hover{background:rgba(139,92,246,.18);border-style:solid}
+  .gsel{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;cursor:pointer;
+    border:1px solid #23232f;background:#14141f;margin-bottom:7px;transition:.15s}
+  .gsel.on{border-color:rgba(37,244,238,.55);background:rgba(37,244,238,.08)}
+  .gsel .tick{width:20px;height:20px;border-radius:6px;border:1.5px solid #3a3a4d;display:grid;place-items:center;
+    font-size:12px;color:#0b0b12;font-weight:900;margin-left:auto;flex:0 0 auto}
+  .gsel.on .tick{background:var(--cyan);border-color:var(--cyan)}
+  .gsel .ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+  .gsel .gname{font-weight:700;font-size:14px;color:#eaeaf2}
+  .gsel .gsub{font-size:11.5px;color:#8b8b9e}
+  .kick-btn{margin-left:auto;flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,60,90,.45);
+    background:rgba(255,60,90,.12);color:#ff8fa3;font-size:14px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .kick-btn:hover{background:rgba(255,60,90,.25);color:#fff}
+  .crown{font-size:11px;vertical-align:1px}
+  .badge-admin{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:6px;background:rgba(255,214,10,.15);
+    border:1px solid rgba(255,214,10,.4);color:#ffd60a;font-size:10px;font-weight:800;letter-spacing:.3px}
+  .gtitle{display:flex;align-items:center;gap:8px}
+  .gmem{font-size:11px;color:var(--muted);font-weight:600}
   .preview-row{display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px;border-radius:15px;background:var(--panel2);border:1px solid var(--line)}
   .preview-ava{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:0 0 auto}
   .preview-name{font-weight:700;font-size:14.5px}
@@ -225,7 +253,7 @@
   /* ---------- SHEET ---------- */
   .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);z-index:80;display:flex;align-items:flex-end;justify-content:center}
   @media(min-width:640px){.backdrop{align-items:center}}
-  .sheet{width:100%;max-width:430px;background:var(--panel);border:1px solid var(--line);border-radius:26px 26px 0 0;padding:22px;
+  .sheet{position:relative;width:100%;max-width:430px;background:var(--panel);border:1px solid var(--line);border-radius:26px 26px 0 0;padding:22px;
     animation:up .22s cubic-bezier(.2,.9,.3,1);padding-bottom:calc(22px + env(safe-area-inset-bottom))}
   @media(min-width:640px){.sheet{border-radius:26px;margin:20px}}
   @keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
@@ -296,34 +324,46 @@
     </div>
     <p class="tagline">Türkiye'nin her yerinden canlı dedikodu.<br>Yaz, fotoğraf at, ses kaydet — özelden de konuş.</p>
 
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login" type="button">Giriş yap</button>
+      <button class="auth-tab" data-mode="register" type="button">Yeni hesap</button>
+    </div>
+
     <p class="field-label">Kullanıcı adın</p>
-    <input class="field" id="inName" maxlength="24" placeholder="ör. kral_adam" autocomplete="nickname" />
+    <input class="field" id="inName" maxlength="24" placeholder="ör. kral_adam" autocomplete="username" />
 
-    <div style="height:14px"></div>
-    <p class="field-label">Şehrin</p>
-    <div class="row2">
-      <input class="field" id="inCity" maxlength="24" placeholder="ör. İstanbul" />
-      <div class="chips" style="margin:0;align-items:center">
-        <button class="chip" data-city="İstanbul">İstanbul</button>
-        <button class="chip" data-city="Erzurum">Erzurum</button>
+    <p class="field-label" style="margin-top:13px">Şifren</p>
+    <input class="field" id="inPass" type="password" maxlength="64" placeholder="••••••" autocomplete="current-password" />
+
+    <div id="confirmWrap" class="hidden">
+      <p class="field-label" style="margin-top:13px">Şifreni tekrar yaz</p>
+      <input class="field" id="inPass2" type="password" maxlength="64" placeholder="••••••" autocomplete="new-password" />
+    </div>
+
+    <div id="extraWrap" class="hidden">
+      <p class="field-label" style="margin-top:15px">Şehrin</p>
+      <div class="row2">
+        <input class="field" id="inCity" maxlength="24" placeholder="ör. İstanbul" />
+        <div class="chips" style="margin:0;align-items:center">
+          <button class="chip" data-city="İstanbul" type="button">İstanbul</button>
+          <button class="chip" data-city="Erzurum" type="button">Erzurum</button>
+        </div>
+      </div>
+      <p class="field-label" style="margin-top:15px">Avatarın</p>
+      <div class="emoji-grid" id="emojiGrid"></div>
+      <div class="preview-row" id="previewRow">
+        <div class="preview-ava" id="pvAva">😎</div>
+        <div style="min-width:0">
+          <div class="preview-name" id="pvName">Misafir</div>
+          <div class="preview-sub" id="pvSub">Şehir seçilmedi</div>
+        </div>
+        <button class="chip" style="margin-left:auto" id="recolor" type="button">🎨</button>
       </div>
     </div>
 
-    <div style="height:16px"></div>
-    <p class="field-label">Avatarın</p>
-    <div class="emoji-grid" id="emojiGrid"></div>
-
-    <div class="preview-row" id="previewRow">
-      <div class="preview-ava" id="pvAva">😎</div>
-      <div style="min-width:0">
-        <div class="preview-name" id="pvName">Misafir</div>
-        <div class="preview-sub" id="pvSub">Şehir seçilmedi</div>
-      </div>
-      <button class="chip" style="margin-left:auto" id="recolor">🎨</button>
-    </div>
-
-    <button class="btn-primary" id="btnEnter">Sohbete gir →</button>
-    <p class="auth-note">Bir kez gir, bir daha sormaz. Aynı linke giren herkes seni görür 🔥</p>
+    <div class="auth-err hidden" id="authErr"></div>
+    <button class="btn-primary" id="btnEnter">Giriş yap →</button>
+    <p class="auth-note" id="authNote">Hesabın varsa isim + şifre gir. İlk kez geliyorsan <b>Yeni hesap</b>'a bas.</p>
   </div>
 </div>
 
@@ -387,6 +427,9 @@
       <div class="view hidden" id="viewMessages">
         <div id="dmListWrap" style="flex:1;display:flex;flex-direction:column;min-height:0">
           <div class="panel-head">Sohbetler</div>
+          <div style="padding:10px 12px 0">
+            <button class="group-btn" id="btnNewGroup" type="button">👥 &nbsp;Yeni grup oluştur</button>
+          </div>
           <div class="list" id="dmList"></div>
         </div>
 
@@ -459,6 +502,24 @@
   </div>
 </div>
 
+<!-- ===================== GRUP OLUŞTUR ===================== -->
+<div class="backdrop hidden" id="groupBackdrop">
+  <div class="sheet" style="max-width:460px">
+    <button class="sheet-x" id="groupClose" type="button">✕</button>
+    <div class="sheet-ava" style="font-size:34px">👥</div>
+    <div class="sheet-name">Yeni grup</div>
+    <div class="sheet-city" style="margin-bottom:14px">Kendi aranızda konuşun — genel akışa yazmadan.</div>
+
+    <p class="field-label">Grup adı</p>
+    <input class="field" id="groupName" maxlength="30" placeholder="ör. Adıyaman ekibi" />
+
+    <p class="field-label" style="margin-top:15px">Kimi ekleyeceksin? <span style="text-transform:none;color:#6f6f88">(en az 1 kişi)</span></p>
+    <div id="groupPeople" style="max-height:300px;overflow:auto"></div>
+
+    <button class="btn-primary" id="groupCreate" type="button">Grubu oluştur →</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -499,6 +560,7 @@
     trash: '<svg viewBox="0 0 24 24" style="width:13px;height:13px;display:inline-block;vertical-align:-2px"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/></svg>',
     pin: '<svg class="pin-ico" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   };
+  const BAN = '<svg viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6 18.4 18.4"/></svg>';
   const PENCIL = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;display:inline-block"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   const CHAT_SM = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;display:inline-block"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
 
@@ -570,56 +632,140 @@
     b.onclick = () => { $('#inCity').value = b.dataset.city; paintPreview(); };
   });
 
-  function getUserId() {
-    let id = store.get('st_uid', null);
-    if (!id) { id = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); store.set('st_uid', id); }
-    return id;
-  }
-
   let socket = null;
   let joined = false;
+  let authMode = 'login';
+
+  /* ---------------- giriş ekranı ---------------- */
+  function showAuthErr(msg, ok) {
+    const el = $('#authErr');
+    el.textContent = msg || '';
+    el.classList.toggle('hidden', !msg);
+    el.classList.toggle('auth-ok', !!ok);
+  }
+  function setAuthMode(mode) {
+    authMode = mode;
+    document.querySelectorAll('.auth-tab').forEach((b) => b.classList.toggle('active', b.dataset.mode === (mode === 'setpass' ? 'login' : mode)));
+    $('#confirmWrap').classList.toggle('hidden', mode === 'login');
+    $('#extraWrap').classList.toggle('hidden', mode !== 'register');
+    $('#btnEnter').textContent = mode === 'register' ? 'Hesabı oluştur →'
+      : (mode === 'setpass' ? 'Şifreyi belirle →' : 'Giriş yap →');
+    $('#inPass').setAttribute('autocomplete', mode === 'login' ? 'current-password' : 'new-password');
+    $('#authNote').innerHTML = mode === 'register'
+      ? 'İsim + şifre belirle, hesabın oluşsun. Bir daha şifre sormayacak (bu cihazda).'
+      : (mode === 'setpass'
+        ? 'Bu hesabın henüz şifresi yok — ilk girişin. Bir şifre belirle, bir daha sormayacak.'
+        : 'Hesabın varsa isim + şifre gir. İlk kez geliyorsan <b>Yeni hesap</b>\'a bas.');
+    showAuthErr('');
+    paintPreview();
+  }
+  document.querySelectorAll('.auth-tab').forEach((b) => { b.onclick = () => setAuthMode(b.dataset.mode); });
+
+  function submitAuth() {
+    const name = $('#inName').value.trim();
+    const pass = $('#inPass').value;
+    const pass2 = $('#inPass2').value;
+    if (name.length < 2) return showAuthErr('Kullanıcı adı en az 2 karakter olmalı.');
+    if (pass.length < 4) return showAuthErr('Şifre en az 4 karakter olmalı.');
+    if (authMode !== 'login' && pass !== pass2) return showAuthErr('Şifreler uyuşmuyor.');
+    if (!socket || !socket.connected) {
+      showAuthErr('Sunucuya bağlanılıyor… bir saniye sonra tekrar dene.');
+      ensureSocket();
+      return;
+    }
+    const payload = {
+      name, password: pass, confirm: pass2,
+      city: $('#inCity').value.trim(), emoji: pickedEmoji, color: pickedColor,
+    };
+    const ev = authMode === 'register' ? 'auth:register' : (authMode === 'setpass' ? 'auth:setpass' : 'auth:login');
+    socket.emit(ev, payload);
+  }
+  $('#btnEnter').onclick = submitAuth;
+  ['#inName', '#inPass', '#inPass2'].forEach((sel) => {
+    const el = document.querySelector(sel);
+    if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAuth(); });
+  });
 
   function enterApp(profile) {
     $('#auth').classList.add('hidden');
     $('#main').classList.remove('hidden');
     $('#bottomNav').classList.remove('hidden');
-    connect(profile);
+    if (profile) {
+      if (profile.emoji) pickedEmoji = profile.emoji;
+      if (profile.color) pickedColor = profile.color;
+    }
+    setTab(state.tab || 'feed');
   }
 
-  $('#btnEnter').onclick = () => {
-    const name = $('#inName').value.trim();
-    if (name.length < 2) { toast('En az 2 karakterlik bir kullanıcı adı yaz 🙂'); return; }
-    const profile = { name, city: $('#inCity').value.trim(), emoji: pickedEmoji, color: pickedColor };
-    store.set('st_profile', profile); store.set('st_emoji', pickedEmoji); store.set('st_color', pickedColor);
-    enterApp(profile);
-  };
-  $('#inName').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btnEnter').click(); });
-
-  /* ---- OTOMATİK GİRİŞ: kayıtlı profil varsa isim sormaz ---- */
-  const savedProfile = store.get('st_profile', null);
-  if (savedProfile && savedProfile.name && savedProfile.name.length >= 2) {
-    if (savedProfile.emoji) pickedEmoji = savedProfile.emoji;
-    if (savedProfile.color) pickedColor = savedProfile.color;
-    $('#inName').value = savedProfile.name;
-    $('#inCity').value = savedProfile.city || '';
-    paintPreview();
-    enterApp(savedProfile);
-    setTimeout(() => toast('Tekrar hoş geldin ' + savedProfile.name + ' 👋'), 1400);
-  } else {
-    $('#auth').classList.remove('hidden');
-    paintPreview();
-  }
-
-  /* ================= socket ================= */
-  function connect(profile) {
-    if (socket) { try { socket.disconnect(); } catch (e) {} }
+  /* ---------------- socket ---------------- */
+  function ensureSocket() {
+    if (socket) return socket;
     socket = io({ transports: ['websocket', 'polling'], reconnection: true });
 
     socket.on('connect', () => {
-      socket.emit('hello', {
-        userId: getUserId(), name: profile.name, city: profile.city,
-        emoji: profile.emoji, color: profile.color,
-      });
+      const creds = store.get('st_auth', null);
+      if (creds && creds.uid && creds.token) {
+        socket.emit('auth:token', { uid: creds.uid, token: creds.token });
+      } else {
+        showAuthScreen();
+      }
+    });
+
+    /* ---- oturum sonuçları ---- */
+    socket.on('auth:ok', ({ user, token }) => {
+      if (!user) return;
+      state.me = user;
+      if (token) store.set('st_auth', { uid: user.id, token });
+      store.set('st_profile', { name: user.name, city: user.city || '', emoji: user.emoji, color: user.color });
+      store.set('st_uid', user.id);
+      $('#authErr').classList.add('hidden');
+      enterApp({ emoji: user.emoji, color: user.color });
+      $('#topSub').textContent = 'Bağlandı · ' + user.name;
+      if (!sessionStorage.getItem('st_greet')) {
+        sessionStorage.setItem('st_greet', '1');
+        setTimeout(() => toast('Hoş geldin ' + user.name + (user.isAdmin ? ' 👑' : ' 👋')), 700);
+      }
+    });
+
+    socket.on('auth:err', ({ message, code, needSetPass }) => {
+      if ($('#main').classList.contains('hidden')) {
+        if (needSetPass) {
+          setAuthMode('setpass');
+          showAuthErr(message || 'Şifre belirle.');
+        } else {
+          showAuthErr(message || 'Bir hata oldu.');
+        }
+      } else {
+        toast(message || 'Bir hata oldu');
+      }
+    });
+
+    socket.on('auth:need', () => {
+      store.del('st_auth');
+      showAuthScreen();
+    });
+
+    socket.on('kicked', ({ by }) => {
+      store.del('st_auth'); store.del('st_profile'); store.del('st_uid');
+      alert('⛔ Yönetici (' + (by || 'yönetici') + ') tarafından sohbetten çıkarıldın.');
+      location.reload();
+    });
+
+    socket.on('rename:ok', ({ name }) => {
+      const p = store.get('st_profile', {}) || {};
+      store.set('st_profile', { ...p, name });
+      toast('Adın güncellendi: ' + name);
+    });
+
+    socket.on('group:created', ({ key }) => {
+      closeGroupSheet();
+      toast('Grup oluşturuldu 👥');
+      openDm(key);
+    });
+
+    socket.on('group:updated', ({ key, group }) => {
+      const c = state.convos.get(key);
+      if (c) { c.group = group; c.memberCount = group.uids.length; renderDmList(); if (state.activeDm === key) updateHeader(); }
     });
 
     fetch('/health').then((r) => r.json()).then((h) => {
@@ -673,6 +819,10 @@
           unread: existing ? existing.unread : 0,
           updated: item.updated || 0,
           last: item.last || null,
+          isGroup: !!item.isGroup,
+          memberCount: item.memberCount || 2,
+          owner: item.owner || null,
+          group: existing ? existing.group : null,
         });
         if (item.peerRead) state.peerRead.set(item.peerId, item.peerRead);
       });
@@ -681,17 +831,24 @@
       renderDmList();
     });
 
-    socket.on('dm:history', ({ peerId, messages, peerRead }) => {
+    socket.on('dm:history', ({ peerId, messages, peerRead, isGroup, group }) => {
       const c = ensureConvo(peerId);
       c.messages = messages || [];
+      if (isGroup && group) {
+        c.isGroup = true;
+        c.group = group;
+        c.memberCount = (group.uids || []).length;
+        c.peer = { id: peerId, name: group.name, emoji: '👥', color: '#8b5cf6', online: false, lastSeen: 0 };
+      }
       if (peerRead) state.peerRead.set(peerId, peerRead);
       if (state.activeDm === peerId) { renderThread(); markRead(peerId); }
       renderDmList();
     });
 
     socket.on('dm:new', (m) => {
-      const peerId = m.from === (state.me && state.me.id) ? m.to : m.from;
-      const known = findUser(peerId);
+      const isGroupMsg = !!(m.to && String(m.to).startsWith('g:'));
+      const peerId = isGroupMsg ? m.to : (m.from === (state.me && state.me.id) ? m.to : m.from);
+      const known = isGroupMsg ? true : findUser(peerId);
       if (!known) {
         state.users.push({ id: peerId, name: m.from === peerId ? m.name : 'Kullanıcı', emoji: m.from === peerId ? m.emoji : '👤', color: m.color || '#666666', online: true, lastSeen: Date.now() });
         renderPeople();
@@ -707,7 +864,7 @@
         if (!mine) {
           c.unread = (c.unread || 0) + 1;
           beep(920);
-          if (state.tab !== 'messages') toast('✉️ ' + m.name + ': ' + previewText(m));
+          if (state.tab !== 'messages') toast((isGroupMsg ? '👥 ' : '✉️ ') + m.name + ': ' + previewText(m));
         }
         renderDmList();
       }
@@ -793,7 +950,8 @@
     const delBtn = mine && !m.deleted
       ? `<button class="del-btn" title="Sil" data-del="${esc(m.id)}">${ICONS.trash}</button>`
       : '';
-    const receipt = (scope === 'dm' && mine && !m.deleted)
+    const isGroupThread = !!(state.activeDm && (state.convos.get(state.activeDm) || {}).isGroup);
+    const receipt = (scope === 'dm' && mine && !m.deleted && !isGroupThread)
       ? `<div class="receipt" data-ts="${m.ts}">✓ Gönderildi</div>`
       : '';
     row.innerHTML = `
@@ -1083,18 +1241,27 @@
   }
 
   /* ================= kişiler ================= */
+  function kickUser(u) {
+    if (!confirm(u.name + ' adlı kişiyi sohbetten atmak istiyor musun?\n(mesajları kalır)')) return;
+    if (socket) socket.emit('admin:kick', { userId: u.id });
+    toast('⛔ ' + u.name + ' atıldı');
+  }
+
   function personNode(u) {
     const b = document.createElement('button');
     b.className = 'person';
     const isMe = state.me && u.id === state.me.id;
+    const iAmAdmin = !!(state.me && state.me.isAdmin);
     b.innerHTML = `
       <div class="ava" style="${avaStyle(u.color)}">${esc(u.emoji)}${u.online ? '<span class="online-dot"></span>' : ''}</div>
       <div class="p-body">
-        <div class="p-name">${esc(u.name)}${isMe ? ' <span style="color:#8b8b9e;font-weight:600">(sen)</span>' : ''}</div>
+        <div class="p-name">${esc(u.name)}${u.isAdmin ? ' <span class="crown" title="Yönetici">👑</span>' : ''}${isMe ? ' <span style="color:#8b8b9e;font-weight:600">(sen)</span>' : ''}</div>
         <div class="p-sub">${u.city ? ICONS.pin + ' ' + esc(u.city) + ' · ' : ''}${u.online ? '<span style="color:#2ee6a8">çevrimiçi</span>' : fmtAgo(u.lastSeen)}</div>
       </div>
-      ${isMe ? '' : `<span class="dm-mini">${CHAT_SM}</span>`}`;
+      ${isMe ? '' : `<span class="dm-mini">${CHAT_SM}</span>`}
+      ${iAmAdmin && !isMe ? `<button class="kick-btn" type="button" title="Sohbetten at">${BAN}</button>` : ''}`;
     b.onclick = (e) => {
+      if (e.target.closest('.kick-btn')) { e.stopPropagation(); kickUser(u); return; }
       if (isMe) { openProfile(u.id); return; }
       if (e.target.closest('.dm-mini')) { openDm(u.id); return; }
       openProfile(u.id);
@@ -1124,8 +1291,14 @@
       if (state.activeDm) {
         const c = state.convos.get(state.activeDm);
         const p = c ? c.peer : findUser(state.activeDm);
-        t.innerHTML = ICONS.chat + ' Özel Mesaj';
-        s.textContent = p ? p.name + (p.online ? ' · çevrimiçi' : '') : '';
+        if (c && c.isGroup) {
+          t.innerHTML = '👥 ' + esc(c.peer.name);
+          const onlineCount = (c.group && c.group.members) ? c.group.members.filter((m2) => m2.online).length : 0;
+          s.textContent = (c.memberCount || 2) + ' üye' + (onlineCount ? ' · ' + onlineCount + ' çevrimiçi' : '');
+        } else {
+          t.innerHTML = ICONS.chat + ' Özel Mesaj';
+          s.textContent = p ? p.name + (p.online ? ' · çevrimiçi' : '') : '';
+        }
         $('#backBtn').classList.remove('hidden');
         return;
       }
@@ -1205,7 +1378,9 @@
       c.messages.forEach((m) => feed.appendChild(messageRow(m, 'dm')));
       updateReceipts();
     } else {
-      feed.innerHTML = `<div class="empty"><span class="big">👋</span><b>${esc(c.peer.name)}</b> ile sohbet başlat.<br>Bu mesajları sadece ikiniz görürsünüz.</div>`;
+      feed.innerHTML = c.isGroup
+        ? `<div class="empty"><span class="big">👥</span><b>${esc(c.peer.name)}</b> grubuna hoş geldin.<br>Burada yazdıklarınızı sadece grup üyeleri görür.</div>`
+        : `<div class="empty"><span class="big">👋</span><b>${esc(c.peer.name)}</b> ile sohbet başlat.<br>Bu mesajları sadece ikiniz görürsünüz.</div>`;
     }
     if (keepScroll) feed.scrollTop = prevScroll;
     else feed.scrollTop = feed.scrollHeight;
@@ -1254,7 +1429,7 @@
             <span class="convo-time">${last ? fmtTime(last.ts) : ''}</span>
             ${c.unread ? `<span class="unread">${c.unread}</span>` : ''}
           </div>
-          <div class="convo-last">${esc(lastText)}</div>
+          <div class="convo-last">${c.isGroup ? '👥 ' + (c.memberCount || 2) + ' üye · ' : ''}${esc(lastText)}</div>
         </div>`;
       btn.querySelector('.ava').style.position = 'relative';
       btn.onclick = () => openDm(c.peerId);
@@ -1285,7 +1460,7 @@
     const isMe = state.me && userId === state.me.id;
     $('#sheetAva').textContent = u.emoji || '👤';
     $('#sheetAva').style.cssText = 'width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:38px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.16);' + avaStyle(u.color || '#666');
-    $('#sheetName').textContent = u.name + (isMe ? ' (sen)' : '');
+    $('#sheetName').innerHTML = esc(u.name) + (u.isAdmin ? ' <span class="badge-admin">👑 YÖNETİCİ</span>' : '') + (isMe ? ' <span style="color:#8b8b9e;font-size:13px">(sen)</span>' : '');
     $('#sheetCity').innerHTML = u.city ? ICONS.pin + ' ' + esc(u.city) : '<span style="opacity:.6">Şehir belirtilmedi</span>';
     $('#statOnline').textContent = u.online ? 'Çevrimiçi' : 'Gitti';
     $('#statOnline').style.color = u.online ? '#2ee6a8' : '#8b8b9e';
@@ -1312,21 +1487,61 @@
     const u = state.me;
     if (!u) return;
     const nn = prompt('Yeni kullanıcı adın:', u.name);
-    if (!nn || nn.trim().length < 2) return;
-    const profile = { name: nn.trim().slice(0, 24), city: u.city || '', emoji: u.emoji, color: u.color };
-    store.set('st_profile', profile);
-    if (socket) socket.emit('hello', { userId: getUserId(), ...profile });
-    toast('İsmin güncellendi');
+    if (!nn || !nn.trim()) return;
+    const name = nn.trim().slice(0, 24);
+    if (name.length < 2) return toast('En az 2 karakter olmalı');
+    if (name.toLowerCase() === String(u.name).toLowerCase()) return toast('İsim aynı kaldı');
+    const pass = prompt('Onay için şifreni yaz:');
+    if (pass == null) return;
+    socket.emit('auth:rename', { name, password: pass });
   }
 
   $('#btnRename').onclick = () => {
     // kendi profil kartındayız
     closeSheet(); renameMe();
   };
-  $('#btnLogout').onclick = () => {
-    if (!confirm('Çıkış yapılsın mı? (profilin silinir, tekrar isim sorulur)')) return;
-    store.del('st_profile'); store.del('st_uid'); store.del('st_emoji'); store.del('st_color');
-    location.reload();
+
+  /* ================= grup oluştur ================= */
+  let groupSel = new Set();
+  function renderGroupPeople() {
+    const wrap = $('#groupPeople');
+    const me = state.me ? state.me.id : null;
+    const list = state.users.filter((u) => u.id !== me)
+      .sort((a, b) => (b.online === a.online ? (b.lastSeen || 0) - (a.lastSeen || 0) : b.online - a.online));
+    if (!list.length) { wrap.innerHTML = '<div class="empty" style="padding:14px">Henüz başka kimse yok.</div>'; return; }
+    wrap.innerHTML = '';
+    list.forEach((u) => {
+      const on = groupSel.has(u.id);
+      const d = document.createElement('div');
+      d.className = 'gsel' + (on ? ' on' : '');
+      d.innerHTML = `<div class="ava" style="${avaStyle(u.color)}">${esc(u.emoji)}</div>
+        <div><div class="gname">${esc(u.name)}${u.isAdmin ? ' 👑' : ''}</div>
+        <div class="gsub">${u.online ? 'çevrimiçi' : fmtAgo(u.lastSeen)}</div></div>
+        <span class="tick">${on ? '✓' : ''}</span>`;
+      d.onclick = () => { if (groupSel.has(u.id)) groupSel.delete(u.id); else groupSel.add(u.id); renderGroupPeople(); };
+      wrap.appendChild(d);
+    });
+  }
+  function openGroupSheet() {
+    groupSel.clear();
+    $('#groupName').value = '';
+    renderGroupPeople();
+    $('#groupBackdrop').classList.remove('hidden');
+    setTimeout(() => { const el = $('#groupName'); if (el) el.focus(); }, 150);
+  }
+  function closeGroupSheet() { $('#groupBackdrop').classList.add('hidden'); }
+  $('#btnNewGroup').onclick = openGroupSheet;
+  $('#groupClose').onclick = closeGroupSheet;
+  $('#groupBackdrop').addEventListener('click', (e) => { if (e.target.id === 'groupBackdrop') closeGroupSheet(); });
+  $('#groupCreate').onclick = () => {
+    const uids = [...groupSel];
+    if (!uids.length) return toast('Gruba en az bir kişi ekle 👥');
+    const name = $('#groupName').value.trim() || 'Yeni grup';
+    if (!socket) return;
+    const btn = $('#groupCreate');
+    btn.textContent = 'Oluşturuluyor…';
+    socket.emit('group:create', { name, uids });
+    setTimeout(() => { btn.textContent = 'Grubu oluştur →'; }, 1500);
   };
 
   /* ================= davet ================= */
@@ -1337,6 +1552,36 @@
   };
 
   /* ================= başlat ================= */
+  function showAuthScreen() {
+    state.me = null;
+    $('#main').classList.add('hidden');
+    $('#bottomNav').classList.add('hidden');
+    $('#auth').classList.remove('hidden');
+    const saved = store.get('st_profile', null);
+    if (saved && saved.name) { $('#inName').value = saved.name; $('#inCity').value = saved.city || ''; }
+    if (saved && saved.emoji) pickedEmoji = saved.emoji;
+    if (saved && saved.color) pickedColor = saved.color;
+    setAuthMode('login');
+    paintPreview();
+    setTimeout(() => { const el = $('#inPass'); if (el && !$('#auth').classList.contains('hidden')) el.focus(); }, 300);
+  }
+
+  $('#btnLogout').onclick = () => {
+    if (!confirm('Çıkış yapılsın mı? Tekrar girerken isim + şifre sorulur.')) return;
+    store.del('st_auth'); store.del('st_profile'); store.del('st_uid'); store.del('st_emoji'); store.del('st_color');
+    sessionStorage.removeItem('st_greet');
+    location.reload();
+  };
+
+  ensureSocket();
+  const creds0 = store.get('st_auth', null);
+  if (creds0 && creds0.uid && creds0.token) {
+    // sessiz otomatik giriş — cevap gelene kadar giriş ekranı gösterme
+    setTimeout(() => { if (!state.me) showAuthScreen(); }, 4000);
+  } else {
+    showAuthScreen();
+  }
+
   window.addEventListener('popstate', () => {
     if (state.tab === 'messages' && state.activeDm) { state.activeDm = null; syncDmView(); renderDmList(); }
   });

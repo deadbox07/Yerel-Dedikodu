@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { Server } = require('socket.io');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -223,10 +224,33 @@ const clean = (v, max) =>
   String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max);
 const colorOk = (c) => (/^#[0-9a-fA-F]{6}$/.test(String(c || '')) ? String(c) : '#fe2c55');
 
+/* ---------------- şifreli hesaplar ---------------- */
+const ADMIN_NAME = (process.env.ADMIN_NAME || 'deadbox1903').trim().toLowerCase();
+const nameKey = (n) => String(n || '').trim().toLowerCase();
+const hashPass = (pass, salt) => crypto.scryptSync(String(pass), salt, 32).toString('hex');
+const newSalt = () => crypto.randomBytes(12).toString('hex');
+const newToken = () => crypto.randomBytes(24).toString('hex');
+
+function findUserByName(name) {
+  const k = nameKey(name);
+  if (!k) return null;
+  return Object.values(db.users).find((u) => nameKey(u.name) === k) || null;
+}
+const isAdminName = (n) => nameKey(n) === ADMIN_NAME;
+
+function groupInfo(thread, key) {
+  const members = thread.uids.map((id) => {
+    const u = db.users[id];
+    return u ? pub(u) : { id, name: 'Ayrıldı', emoji: '👤', color: '#666666', online: false, lastSeen: 0 };
+  });
+  return { key, name: thread.name || 'Grup', uids: thread.uids.slice(), owner: thread.owner || null, members };
+}
+
 function pub(u) {
   return {
     id: u.id, name: u.name, city: u.city || '', emoji: u.emoji || '😎',
     color: u.color || '#fe2c55', online: (online.get(u.id) || 0) > 0, lastSeen: u.lastSeen || 0,
+    isAdmin: !!u.isAdmin,
   };
 }
 
@@ -263,16 +287,28 @@ function dmListFor(userId) {
   const out = [];
   for (const [key, thread] of Object.entries(db.dms)) {
     if (!Array.isArray(thread.uids) || !thread.uids.includes(userId)) continue;
-    const peerId = thread.uids.find((x) => x !== userId);
-    const peer = db.users[peerId] || { id: peerId, name: 'Bilinmeyen', emoji: '👤', color: '#666666' };
+    if (!Array.isArray(thread.messages)) thread.messages = [];
+    const isGroup = !!thread.isGroup;
+    const peerId = isGroup ? key : thread.uids.find((x) => x !== userId);
+    let peer;
+    if (isGroup) {
+      const onlineCount = thread.uids.filter((id) => (online.get(id) || 0) > 0).length;
+      peer = { id: key, name: thread.name || 'Grup', emoji: '👥', color: '#8b5cf6', online: onlineCount > 0, lastSeen: 0, isAdmin: false };
+    } else {
+      const raw = db.users[peerId] || { id: peerId, name: 'Bilinmeyen', emoji: '👤', color: '#666666' };
+      peer = pub(raw);
+    }
     const last = thread.messages[thread.messages.length - 1] || null;
     out.push({
-      key, peerId, peer: pub(peer), last, updated: last ? last.ts : 0,
-      peerRead: peerReadTs(userId, peerId), // benim ona gönderdiklerimin okunma zamanı
+      key, peerId, peer, isGroup,
+      memberCount: thread.uids.length,
+      owner: thread.owner || null,
+      last, updated: last ? last.ts : 0,
+      peerRead: isGroup ? 0 : peerReadTs(userId, peerId),
     });
   }
   out.sort((a, b) => b.updated - a.updated);
-  return out.slice(0, 120);
+  return out.slice(0, 150);
 }
 
 function systemMessage(text) {
@@ -291,56 +327,6 @@ io.on('connection', (socket) => {
   let bucket = 0;
   const bucketReset = setInterval(() => (bucket = 0), 6000);
   socket.on('disconnect', () => clearInterval(bucketReset));
-
-  socket.on('hello', (payload) => {
-    const p = payload || {};
-    const userId = clean(p.userId, 64) || uid();
-    const name = clean(p.name, 24) || 'Misafir';
-    const city = clean(p.city, 24);
-    const emoji = clean(p.emoji, 8) || '😎';
-    const color = colorOk(p.color);
-
-    const prev = db.users[userId];
-    const isNew = !prev || prev.name !== name;
-    db.users[userId] = { id: userId, name, city, emoji, color, lastSeen: Date.now() };
-
-    const oldUserId = socketUser.get(socket.id);
-    if (oldUserId && oldUserId !== userId) {
-      const c = (online.get(oldUserId) || 1) - 1;
-      if (c > 0) online.set(oldUserId, c); else online.delete(oldUserId);
-    }
-
-    socketUser.set(socket.id, userId);
-    socket.data.userId = userId;
-    if (socket.data.room) socket.leave(socket.data.room);
-    socket.data.room = 'u:' + userId;
-    socket.join(socket.data.room);
-
-    online.set(userId, (online.get(userId) || 0) + 1);
-
-    socket.emit('me', { user: pub(db.users[userId]) });
-    socket.emit('global:history', db.global.slice(-200));
-    socket.emit('dm:list', dmListFor(userId));
-    broadcastPresence();
-
-    const lastJoin = joinTimes.get(userId) || 0;
-    if (isNew && Date.now() - lastJoin > 60000) {
-      joinTimes.set(userId, Date.now());
-      systemMessage(`${name}${city ? ' (' + city + ')' : ''} sohbete katıldı 👋`);
-    }
-    trimUsers();
-    scheduleSave();
-  });
-
-  function guard() {
-    if (!socket.data.userId) return false;
-    bucket++;
-    if (bucket > 20) {
-      socket.emit('err', { message: 'Çok hızlı yazıyorsun, biraz bekle 🙂' });
-      return false;
-    }
-    return true;
-  }
 
   async function buildMessage(base, payload) {
     const text = clean(payload && payload.text, 500);
@@ -363,6 +349,199 @@ io.on('connection', (socket) => {
     return msg;
   }
 
+  // hız sınırı (6 saniyede en fazla 25 olay)
+  function guard() {
+    bucket++;
+    if (bucket > 25) {
+      socket.emit('err', { message: 'Çok hızlı yazıyorsun, biraz bekle 🙂' });
+      return false;
+    }
+    return true;
+  }
+
+  /* ---------------- oturum açma ---------------- */
+  function attach(socket, user, isNew) {
+    const oldUserId = socketUser.get(socket.id);
+    if (oldUserId && oldUserId !== user.id) {
+      const c = (online.get(oldUserId) || 1) - 1;
+      if (c > 0) online.set(oldUserId, c); else online.delete(oldUserId);
+    }
+    socketUser.set(socket.id, user.id);
+    socket.data.userId = user.id;
+    if (socket.data.room) socket.leave(socket.data.room);
+    socket.data.room = 'u:' + user.id;
+    socket.join(socket.data.room);
+    online.set(user.id, (online.get(user.id) || 0) + 1);
+    user.lastSeen = Date.now();
+    if (!Array.isArray(user.tokens)) user.tokens = [];
+
+    socket.emit('auth:ok', { user: pub(user), token: socket.data.token || null });
+    socket.emit('me', { user: pub(user) });
+    socket.emit('global:history', db.global.slice(-200));
+    socket.emit('dm:list', dmListFor(user.id));
+    broadcastPresence();
+
+    if (isNew) {
+      const lastJoin = joinTimes.get(user.id) || 0;
+      if (Date.now() - lastJoin > 60000) {
+        joinTimes.set(user.id, Date.now());
+        systemMessage(`${user.name}${user.city ? ' (' + user.city + ')' : ''} sohbete katıldı 👋`);
+      }
+    }
+    trimUsers();
+    scheduleSave();
+  }
+
+  socket.on('auth:register', (payload) => {
+    if (!guard()) return;
+    const p = payload || {};
+    const name = clean(p.name, 24);
+    const pass = String(p.password || '');
+    const confirm = String(p.confirm || '');
+    if (name.length < 2) return socket.emit('auth:err', { code: 'name_short', message: 'Kullanıcı adı en az 2 karakter olmalı.' });
+    if (pass.length < 4) return socket.emit('auth:err', { code: 'pass_short', message: 'Şifre en az 4 karakter olmalı.' });
+    if (pass !== confirm) return socket.emit('auth:err', { code: 'pass_mismatch', message: 'Şifreler uyuşmuyor.' });
+    if (findUserByName(name)) return socket.emit('auth:err', { code: 'name_taken', message: 'Bu isim kullanılıyor — şifrenle giriş yap.' });
+
+    const salt = newSalt();
+    const user = {
+      id: uid(), name, city: clean(p.city, 24), emoji: clean(p.emoji, 8) || '😎',
+      color: colorOk(p.color), salt, passHash: hashPass(pass, salt),
+      tokens: [newToken()], isAdmin: isAdminName(name), createdAt: Date.now(), lastSeen: Date.now(),
+    };
+    db.users[user.id] = user;
+    socket.data.token = user.tokens[0];
+    attach(socket, user, true);
+  });
+
+  socket.on('auth:login', (payload) => {
+    if (!guard()) return;
+    const p = payload || {};
+    const user = findUserByName(p.name);
+    if (!user) return socket.emit('auth:err', { code: 'no_user', message: 'Böyle bir hesap yok. "Yeni hesap" ile kayıt ol.' });
+    if (!user.passHash) return socket.emit('auth:err', { code: 'no_pass', message: 'Bu hesabın henüz şifresi yok — şifre belirle.', needSetPass: true });
+    if (hashPass(String(p.password || ''), user.salt) !== user.passHash) {
+      return socket.emit('auth:err', { code: 'bad_pass', message: 'Şifre yanlış.' });
+    }
+    const token = newToken();
+    user.tokens = [...(user.tokens || []).slice(-4), token];
+    socket.data.token = token;
+    attach(socket, user, false);
+  });
+
+  // eski (şifresiz) hesaplar için bir kerelik şifre belirleme
+  socket.on('auth:setpass', (payload) => {
+    if (!guard()) return;
+    const p = payload || {};
+    const user = findUserByName(p.name);
+    if (!user) return socket.emit('auth:err', { code: 'no_user', message: 'Böyle bir hesap yok.' });
+    if (user.passHash) return socket.emit('auth:err', { code: 'has_pass', message: 'Bu hesabın şifresi zaten var.' });
+    const pass = String(p.password || '');
+    const confirm = String(p.confirm || '');
+    if (pass.length < 4) return socket.emit('auth:err', { code: 'pass_short', message: 'Şifre en az 4 karakter olmalı.' });
+    if (pass !== confirm) return socket.emit('auth:err', { code: 'pass_mismatch', message: 'Şifreler uyuşmuyor.' });
+    user.salt = newSalt();
+    user.passHash = hashPass(pass, user.salt);
+    const token = newToken();
+    user.tokens = [token];
+    socket.data.token = token;
+    attach(socket, user, false);
+  });
+
+  socket.on('auth:token', (payload) => {
+    const p = payload || {};
+    const id = clean(p.uid, 64);
+    const token = clean(p.token, 128);
+    const user = id ? db.users[id] : null;
+    if (!user || !Array.isArray(user.tokens) || !user.tokens.includes(token)) {
+      return socket.emit('auth:need', { reason: 'token' });
+    }
+    socket.data.token = token;
+    attach(socket, user, false);
+  });
+
+  socket.on('auth:rename', (payload) => {
+    const me = socket.data.userId;
+    const u = me && db.users[me];
+    if (!u) return;
+    const p = payload || {};
+    const name = clean(p.name, 24);
+    const pass = String(p.password || '');
+    if (name.length < 2) return socket.emit('auth:err', { code: 'name_short', message: 'Kullanıcı adı en az 2 karakter olmalı.' });
+    if (!u.passHash) return socket.emit('auth:err', { code: 'no_pass', message: 'Şifre belirlenmemiş.' });
+    if (hashPass(pass, u.salt) !== u.passHash) return socket.emit('auth:err', { code: 'bad_pass', message: 'Şifre yanlış.' });
+    const other = findUserByName(name);
+    if (other && other.id !== u.id) return socket.emit('auth:err', { code: 'name_taken', message: 'Bu isim kullanılıyor.' });
+    if (nameKey(u.name) === nameKey(name)) return socket.emit('err', { message: 'İsim aynı kaldı.' });
+    u.name = name;
+    if (isAdminName(name)) u.isAdmin = true;
+    socket.emit('me', { user: pub(u) });
+    socket.emit('auth:ok', { user: pub(u), token: socket.data.token || null });
+    socket.emit('rename:ok', { name: u.name });
+    broadcastPresence();
+    scheduleSave();
+  });
+
+  /* ---------------- yönetici ---------------- */
+  socket.on('admin:kick', (payload) => {
+    const me = socket.data.userId;
+    const mod = me && db.users[me];
+    if (!mod || !mod.isAdmin) return socket.emit('err', { message: 'Bu işlem için yönetici olmalısın.' });
+    const targetId = clean(payload && payload.userId, 64);
+    const target = targetId && db.users[targetId];
+    if (!target || target.id === me) return;
+    if (target.isAdmin) return socket.emit('err', { message: 'Yönetici atılamaz.' });
+
+    delete db.users[target.id];
+    online.delete(target.id);
+    for (const [sid, uidOf] of Array.from(socketUser.entries())) {
+      if (uidOf !== target.id) continue;
+      const s2 = io.sockets.sockets.get(sid);
+      if (s2) {
+        s2.emit('kicked', { by: mod.name });
+        setTimeout(() => { try { s2.disconnect(true); } catch (e) {} }, 250);
+      }
+      socketUser.delete(sid);
+    }
+    broadcastPresence();
+    for (const uidTo of Object.keys(db.users)) io.to('u:' + uidTo).emit('dm:list', dmListFor(uidTo));
+    systemMessage(`⛔ ${target.name} yönetici tarafından sohbetten çıkarıldı.`);
+    scheduleSave();
+  });
+
+  /* ---------------- grup sohbetleri ---------------- */
+  socket.on('group:create', (payload) => {
+    if (!guard()) return;
+    const me = socket.data.userId;
+    const u = me && db.users[me];
+    if (!u) return;
+    const p = payload || {};
+    const name = clean(p.name, 30) || 'Yeni grup';
+    const raw = Array.isArray(p.uids) ? p.uids : [];
+    const uids = [...new Set([me, ...raw.map((x) => clean(x, 64)).filter((x) => x && db.users[x])])];
+    if (uids.length < 2) return socket.emit('err', { message: 'Gruba en az bir kişi ekle.' });
+    const key = 'g:' + uid();
+    db.dms[key] = { isGroup: true, name, owner: me, uids, messages: [], createdAt: Date.now() };
+    for (const id of uids) io.to('u:' + id).emit('dm:list', dmListFor(id));
+    socket.emit('group:created', { key });
+    scheduleSave();
+  });
+
+  socket.on('group:add', (payload) => {
+    const me = socket.data.userId;
+    const p = payload || {};
+    const key = clean(p.key, 64);
+    const t = key && db.dms[key];
+    if (!t || !t.isGroup || !t.uids.includes(me)) return;
+    if (t.owner !== me) return socket.emit('err', { message: 'Gruba sadece kurucu üye ekleyebilir.' });
+    const add = (Array.isArray(p.uids) ? p.uids : []).map((x) => clean(x, 64)).filter((x) => x && db.users[x] && !t.uids.includes(x));
+    if (!add.length) return;
+    t.uids.push(...add);
+    for (const id of t.uids) io.to('u:' + id).emit('dm:list', dmListFor(id));
+    for (const id of t.uids) io.to('u:' + id).emit('group:updated', { key, group: groupInfo(t, key) });
+    scheduleSave();
+  });
+
   socket.on('global:send', async (payload) => {
     if (!guard()) return;
     const u = db.users[socket.data.userId];
@@ -381,7 +560,16 @@ io.on('connection', (socket) => {
   socket.on('dm:open', (payload) => {
     const me = socket.data.userId;
     const peerId = clean(payload && payload.peerId, 64);
-    if (!me || !peerId || peerId === me) return;
+    if (!me || !peerId) return;
+    if (peerId.startsWith('g:')) {
+      const t = db.dms[peerId];
+      if (!t || !t.isGroup || !t.uids.includes(me)) return;
+      if (!Array.isArray(t.messages)) t.messages = [];
+      return socket.emit('dm:history', {
+        peerId, isGroup: true, group: groupInfo(t, peerId), messages: t.messages, peerRead: 0,
+      });
+    }
+    if (peerId === me) return;
     const t = getThread(me, peerId, false);
     socket.emit('dm:history', {
       peerId,
@@ -395,7 +583,23 @@ io.on('connection', (socket) => {
     const me = socket.data.userId;
     const u = db.users[me];
     const peerId = clean(payload && payload.to, 64);
-    if (!u || !peerId || peerId === me) return;
+    if (!u || !peerId) return;
+
+    if (peerId.startsWith('g:')) {
+      const t = db.dms[peerId];
+      if (!t || !t.isGroup || !t.uids.includes(me)) return;
+      const gmsg = await buildMessage(
+        { kind: 'dm', from: me, to: peerId, name: u.name, emoji: u.emoji, color: u.color }, payload
+      );
+      if (!gmsg) return;
+      t.messages.push(gmsg);
+      if (t.messages.length > MAX_THREAD) t.messages = t.messages.slice(-MAX_THREAD);
+      for (const id of t.uids) io.to('u:' + id).emit('dm:new', gmsg);
+      scheduleSave();
+      return;
+    }
+
+    if (peerId === me) return;
     if (!db.users[peerId]) { socket.emit('err', { message: 'Bu kullanıcı artık yok.' }); return; }
 
     const msg = await buildMessage(
@@ -416,6 +620,7 @@ io.on('connection', (socket) => {
     const me = socket.data.userId;
     const peerId = clean(payload && payload.peerId, 64);
     if (!me || !peerId || peerId === me) return;
+    if (peerId.startsWith('g:')) return;   // gruplarda "görüldü" yok
     if (!db.reads[me]) db.reads[me] = {};
     db.reads[me][peerId] = Date.now();
     io.to('u:' + peerId).emit('dm:read', { by: me, peerId, ts: db.reads[me][peerId] });
@@ -444,7 +649,7 @@ io.on('connection', (socket) => {
       if (thread.messages[i].from !== me) return;
       thread.messages.splice(i, 1);                 // mesaj tamamen yok oldu
       if (!thread.messages.length) { delete db.dms[key]; } // boş sohbet de silinsin
-      io.to('u:' + thread.uids[0]).to('u:' + thread.uids[1]).emit('msg:deleted', { scope: 'dm', id });
+      for (const uidTo of thread.uids) io.to('u:' + uidTo).emit('msg:deleted', { scope: 'dm', id });
       // sohbet listesindeki son mesaj önizlemesi tazelensin
       for (const uidTo of thread.uids) {
         io.to('u:' + uidTo).emit('dm:list', dmListFor(uidTo));
@@ -460,7 +665,11 @@ io.on('connection', (socket) => {
     if (!u) return;
     const to = clean(payload && payload.to, 64);
     const info = { from: me, name: u.name, emoji: u.emoji, color: u.color, ts: Date.now() };
-    if (to) socket.to('u:' + to).emit('typing', { ...info, scope: 'dm' });
+    if (to && to.startsWith('g:')) {
+      const t = db.dms[to];
+      if (!t || !t.isGroup || !t.uids.includes(me)) return;
+      for (const id of t.uids) if (id !== me) io.to('u:' + id).emit('typing', { ...info, scope: 'dm', to });
+    } else if (to) socket.to('u:' + to).emit('typing', { ...info, scope: 'dm' });
     else socket.broadcast.emit('typing', { ...info, scope: 'global' });
   });
 
@@ -513,7 +722,7 @@ app.get('/health', (_req, res) =>
     messages: db.global.length,
     threads: Object.keys(db.dms).length,
     online: [...online.keys()].length,
-    features: ['photo', 'voice', 'delete', 'read', 'online'],
+    features: ['photo', 'voice', 'delete', 'read', 'online', 'accounts', 'admin', 'groups'],
     dbUrlFound: !!process.env.DATABASE_URL,
     dbUrl: maskUrl(process.env.DATABASE_URL),
     dbError: dbError,
