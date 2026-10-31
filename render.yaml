@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: yerel-dedikodu
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      # Neon'dan alacağın bağlantı adresini Render panelinde buraya yapıştıracaksın
+      - key: DATABASE_URL
+        sync: false
+    autoDeploy: true
