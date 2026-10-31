@@ -14,134 +14,92 @@
     --bg:#000; --panel:#101017; --panel2:#17171f; --panel3:#20202b;
     --line:rgba(255,255,255,.09); --txt:#f2f2f7; --muted:#8b8b9e;
     --pink:#fe2c55; --cyan:#25f4ee; --ok:#2ee6a8;
-    --radius:18px;
   }
   html,body{height:100%}
-  body{
-    margin:0;background:var(--bg);color:var(--txt);
+  body{margin:0;background:var(--bg);color:var(--txt);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-    overscroll-behavior:none;
-  }
+    overscroll-behavior:none}
   button{font-family:inherit;color:inherit;background:none;border:0;cursor:pointer}
-  svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
-  .ico svg,.bn-item .ico svg{width:20px;height:20px}
-  .send svg{width:20px;height:20px;stroke-width:2.1}
-  .pin-ico{width:11px;height:11px;vertical-align:-1px;display:inline-block;opacity:.75}
   input,textarea{font-family:inherit}
+  svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
   .hidden{display:none !important}
 
-  /* ============ AUTH ============ */
-  .auth{
-    min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 18px;
-    background:
-      radial-gradient(900px 500px at 10% -10%, rgba(254,44,85,.30), transparent 60%),
-      radial-gradient(700px 500px at 100% 0%, rgba(37,244,238,.20), transparent 60%),
-      radial-gradient(700px 600px at 50% 120%, rgba(254,44,85,.16), transparent 60%),
-      #050508;
-    position:relative;overflow:hidden;
-  }
-  .auth-card{
-    width:100%;max-width:450px;background:rgba(16,16,23,.86);backdrop-filter:blur(18px);
-    border:1px solid var(--line);border-radius:26px;padding:26px 22px 22px;
-    box-shadow:0 30px 80px rgba(0,0,0,.65);
-  }
+  /* ---------- AUTH ---------- */
+  .auth{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 18px;position:relative;overflow:hidden;
+    background:radial-gradient(900px 500px at 10% -10%,rgba(254,44,85,.30),transparent 60%),
+      radial-gradient(700px 500px at 100% 0%,rgba(37,244,238,.20),transparent 60%),
+      radial-gradient(700px 600px at 50% 120%,rgba(254,44,85,.16),transparent 60%),#050508}
+  .auth-card{width:100%;max-width:450px;background:rgba(16,16,23,.86);backdrop-filter:blur(18px);
+    border:1px solid var(--line);border-radius:26px;padding:26px 22px 22px;box-shadow:0 30px 80px rgba(0,0,0,.65)}
   .logo{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:6px}
-  .logo-mark{
-    width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;
-    background:linear-gradient(135deg,var(--pink),#7d2bff);
-    box-shadow:0 8px 26px rgba(254,44,85,.45);font-weight:800;
-  }
+  .logo-mark{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:21px;
+    background:linear-gradient(135deg,var(--pink),#7d2bff);box-shadow:0 8px 26px rgba(254,44,85,.45);font-weight:800}
+  .logo-mark svg{width:22px;height:22px;stroke:#fff;stroke-width:2.2}
   .logo-txt{font-size:24px;font-weight:900;letter-spacing:-.8px;white-space:nowrap}
   .logo-txt span{background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
   .tagline{text-align:center;color:var(--muted);font-size:13.5px;margin:4px 0 20px;line-height:1.5}
   .field-label{font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--muted);text-transform:uppercase;margin:0 0 7px 4px}
-  .field{
-    width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:14px;
-    padding:14px 15px;color:var(--txt);font-size:15.5px;outline:none;transition:.18s;
-  }
+  .field{width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;color:var(--txt);font-size:15.5px;outline:none;transition:.18s}
   .field::placeholder{color:#5d5d70}
   .field:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(254,44,85,.13)}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
   .row2 .chips{flex-wrap:nowrap}
-  .chip{
-    padding:7px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
-    font-size:12.5px;color:var(--muted);transition:.15s
-  }
+  .chip{padding:7px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12.5px;color:var(--muted);transition:.15s}
   .chip:hover{border-color:#3a3a4a;color:var(--txt)}
   .emoji-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:2px}
-  .emoji-opt{
-    aspect-ratio:1;display:grid;place-items:center;font-size:23px;border-radius:13px;
-    background:var(--panel2);border:1.5px solid transparent;transition:.15s;
-  }
+  .emoji-opt{aspect-ratio:1;display:grid;place-items:center;font-size:23px;border-radius:13px;background:var(--panel2);border:1.5px solid transparent;transition:.15s}
   .emoji-opt:hover{background:var(--panel3);transform:translateY(-1px)}
   .emoji-opt.sel{border-color:var(--pink);background:rgba(254,44,85,.14);box-shadow:0 0 0 3px rgba(254,44,85,.1)}
-  .btn-primary{
-    width:100%;margin-top:20px;padding:15px;border-radius:15px;font-size:16px;font-weight:800;
-    background:linear-gradient(135deg,var(--pink),#ff5c7a);color:#fff;
-    box-shadow:0 12px 30px rgba(254,44,85,.35);transition:.16s;
-  }
+  .btn-primary{width:100%;margin-top:20px;padding:15px;border-radius:15px;font-size:16px;font-weight:800;
+    background:linear-gradient(135deg,var(--pink),#ff5c7a);color:#fff;box-shadow:0 12px 30px rgba(254,44,85,.35);transition:.16s}
   .btn-primary:active{transform:scale(.985)}
-  .btn-primary:disabled{opacity:.55;box-shadow:none}
   .auth-note{text-align:center;font-size:11.5px;color:#5f5f72;margin-top:14px;line-height:1.6}
   .preview-row{display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px;border-radius:15px;background:var(--panel2);border:1px solid var(--line)}
   .preview-ava{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:0 0 auto}
   .preview-name{font-weight:700;font-size:14.5px}
   .preview-sub{font-size:12px;color:var(--muted)}
 
-  /* ============ APP SHELL ============ */
+  /* ---------- SHELL ---------- */
   .main{display:flex;height:100dvh;max-width:1240px;margin:0 auto}
-  .sidebar{
-    width:230px;flex:0 0 auto;padding:18px 12px;border-right:1px solid var(--line);
-    display:flex;flex-direction:column;gap:4px;
-  }
+  .sidebar{width:230px;flex:0 0 auto;padding:18px 12px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
   .side-brand{display:flex;align-items:center;gap:9px;padding:4px 8px 18px}
-  .side-brand .logo-mark{width:34px;height:34px;font-size:18px;border-radius:10px}
+  .side-brand .logo-mark{width:34px;height:34px;border-radius:10px}
   .side-brand .logo-txt{font-size:16.5px;letter-spacing:-.4px}
-  .nav-item{
-    display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:13px;
-    font-size:15px;font-weight:600;color:#c9c9d6;transition:.15s;position:relative;text-align:left;width:100%
-  }
+  .nav-item{display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:13px;font-size:15px;font-weight:600;color:#c9c9d6;transition:.15s;position:relative;text-align:left;width:100%}
   .nav-item:hover{background:var(--panel2);color:#fff}
   .nav-item.active{background:linear-gradient(90deg,rgba(254,44,85,.20),rgba(254,44,85,.04));color:#fff}
   .nav-item.active::before{content:"";position:absolute;left:0;top:22%;height:56%;width:3px;border-radius:0 4px 4px 0;background:var(--pink)}
   .nav-item .ico{font-size:19px;width:22px;text-align:center}
-  .nav-badge{
-    margin-left:auto;background:var(--pink);color:#fff;font-size:11px;font-weight:800;
-    min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 6px;
-  }
+  .nav-item .ico svg,.bn-item .ico svg{width:20px;height:20px}
+  .nav-badge{margin-left:auto;background:var(--pink);color:#fff;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 6px}
   .side-foot{margin-top:auto;padding:12px}
-  .invite-btn{
-    width:100%;padding:12px;border-radius:13px;border:1px dashed rgba(255,255,255,.2);
-    font-size:13px;font-weight:700;color:#d5d5e2;background:rgba(255,255,255,.03);
-    display:flex;align-items:center;justify-content:center;gap:7px
-  }
+  .invite-btn{width:100%;padding:12px;border-radius:13px;border:1px dashed rgba(255,255,255,.2);font-size:13px;font-weight:700;color:#d5d5e2;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;gap:7px}
   .invite-btn:hover{border-color:var(--cyan);color:#fff}
-
+  .invite-btn svg{width:15px;height:15px}
   .content{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;border-right:1px solid var(--line)}
   .rightbar{width:300px;flex:0 0 auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;min-width:0}
-
-  .topbar{
-    height:62px;flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:0 16px;
-    border-bottom:1px solid var(--line);background:rgba(8,8,12,.82);backdrop-filter:blur(14px);
-  }
-  .top-title svg{width:18px;height:18px}
+  .topbar{height:62px;flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--line);background:rgba(8,8,12,.82);backdrop-filter:blur(14px)}
   .top-title{font-size:17px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
-  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 0 rgba(254,44,85,.7);animation:pulse 1.8s infinite}
+  .top-title svg{width:18px;height:18px}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--pink);animation:pulse 1.8s infinite}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(254,44,85,.6)}70%{box-shadow:0 0 0 9px rgba(254,44,85,0)}100%{box-shadow:0 0 0 0 rgba(254,44,85,0)}}
   .top-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
   .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .mini-ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:1.5px solid rgba(255,255,255,.15)}
+  .online-pill{display:flex;align-items:center;gap:6px;background:rgba(46,230,168,.12);border:1px solid rgba(46,230,168,.35);
+    color:#2ee6a8;font-size:12px;font-weight:800;padding:6px 11px;border-radius:999px;white-space:nowrap}
+  .online-pill i{width:7px;height:7px;border-radius:50%;background:#2ee6a8;box-shadow:0 0 8px #2ee6a8;animation:blink 2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
   .persist{font-size:13px;opacity:.45;transition:.2s;cursor:help}
   .persist[data-on="1"]{opacity:1}
   .persist[data-on="0"]{filter:grayscale(1)}
+  .mini-ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:1.5px solid rgba(255,255,255,.15)}
   .back-btn{font-size:22px;line-height:1;padding:4px 6px;border-radius:10px}
   .back-btn:hover{background:var(--panel2)}
-
   .views{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
   .view{flex:1;display:flex;flex-direction:column;min-height:0}
 
-  /* ============ FEED ============ */
+  /* ---------- FEED ---------- */
   .feed{flex:1;overflow-y:auto;padding:16px 16px 8px;scrollbar-width:thin;scrollbar-color:#2a2a36 transparent}
   .feed::-webkit-scrollbar{width:8px}
   .feed::-webkit-scrollbar-thumb{background:#262631;border-radius:8px}
@@ -150,12 +108,9 @@
   .msg{display:flex;gap:9px;margin-bottom:14px;max-width:100%;animation:pop .18s ease-out}
   @keyframes pop{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
   .msg.mine{flex-direction:row-reverse}
-  .ava{
-    width:38px;height:38px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:19px;
-    border:1.5px solid rgba(255,255,255,.14);transition:.15s
-  }
+  .ava{width:38px;height:38px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:19px;
+    border:1.5px solid rgba(255,255,255,.14);transition:.15s;position:relative}
   .ava:active{transform:scale(.93)}
-  .msg .ava:hover{filter:brightness(1.2)}
   .bwrap{min-width:0;max-width:min(74%,520px)}
   .msg.mine .bwrap{display:flex;flex-direction:column;align-items:flex-end}
   .meta{display:flex;align-items:center;gap:7px;margin:1px 0 4px;font-size:12px}
@@ -164,40 +119,62 @@
   .nm:hover{text-decoration:underline}
   .city{font-size:10.5px;color:#7b7b90;background:rgba(255,255,255,.05);padding:1.5px 7px;border-radius:999px}
   .tm{color:#6a6a7e;font-size:10.5px}
-  .bubble{
-    background:var(--panel2);padding:10px 14px;border-radius:16px;border-top-left-radius:5px;
-    font-size:14.5px;line-height:1.45;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;
-    border:1px solid rgba(255,255,255,.055)
-  }
-  .msg.mine .bubble{
-    background:linear-gradient(135deg,var(--pink),#c81f43);border:none;color:#fff;
-    border-radius:16px;border-top-right-radius:5px;box-shadow:0 6px 18px rgba(254,44,85,.22)
-  }
+  .del-btn{opacity:0;color:#8b8b9e;font-size:12px;padding:2px 5px;border-radius:6px;transition:.15s;line-height:1}
+  .del-btn:hover{background:rgba(254,44,85,.18);color:#ff8fa3}
+  .msg:hover .del-btn{opacity:1}
+  @media(max-width:760px){.del-btn{opacity:.45}}
+  .bubble{background:var(--panel2);padding:10px 14px;border-radius:16px;border-top-left-radius:5px;font-size:14.5px;line-height:1.45;
+    word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;border:1px solid rgba(255,255,255,.055)}
+  .msg.mine .bubble{background:linear-gradient(135deg,var(--pink),#c81f43);border:none;color:#fff;border-radius:16px;border-top-right-radius:5px;box-shadow:0 6px 18px rgba(254,44,85,.22)}
+  .bubble.media{padding:5px;background:var(--panel2);border:1px solid rgba(255,255,255,.08)}
+  .msg.mine .bubble.media{background:linear-gradient(135deg,rgba(254,44,85,.9),rgba(200,31,67,.9))}
+  .bubble.deleted{font-style:italic;opacity:.62;font-size:13px}
+  .msg.mine .bubble.deleted{background:#2a2a36;color:#b9b9c9;box-shadow:none}
+  .photo{display:block;max-width:280px;width:100%;border-radius:12px;cursor:zoom-in;background:#000}
+  @media(max-width:760px){.photo{max-width:230px}}
+  .audio-wrap{display:flex;align-items:center;gap:9px;min-width:210px;padding:2px 4px}
+  .audio-wrap audio{width:210px;height:34px}
+  @media(max-width:760px){.audio-wrap audio{width:180px}}
+  .audio-ico{font-size:16px;flex:0 0 auto}
+  .receipt{font-size:10.5px;margin-top:3px;color:#6a6a7e;display:flex;align-items:center;gap:4px}
+  .receipt.seen{color:#25f4ee}
   .typing-line{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:2px 4px 12px;min-height:22px}
   .dots{display:inline-flex;gap:3px}
   .dots i{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:bounce 1.1s infinite}
   .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
   @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
 
-  /* ============ COMPOSER ============ */
-  .composer{
-    flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-    border-top:1px solid var(--line);background:rgba(8,8,12,.92);backdrop-filter:blur(14px)
-  }
-  .composer input{
-    flex:1;background:var(--panel2);border:1.5px solid var(--line);border-radius:999px;
-    padding:13px 17px;color:var(--txt);font-size:15px;outline:none;transition:.16s;min-width:0
-  }
-  .composer input:focus{border-color:rgba(254,44,85,.6);background:#1b1b25}
-  .composer input::placeholder{color:#5d5d70}
-  .send{
-    width:46px;height:46px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:18px;
-    background:linear-gradient(135deg,var(--pink),#ff5c7a);box-shadow:0 6px 18px rgba(254,44,85,.35);transition:.15s
-  }
+  /* ---------- COMPOSER ---------- */
+  .composer{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);background:rgba(8,8,12,.92);backdrop-filter:blur(14px);position:relative}
+  .cbtn{width:42px;height:42px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:18px;
+    background:var(--panel2);border:1px solid var(--line);transition:.15s}
+  .cbtn:hover{background:var(--panel3);border-color:#3a3a4a}
+  .cbtn:active{transform:scale(.92)}
+  .cbtn svg{width:20px;height:20px}
+  .cbtn.rec{background:rgba(254,44,85,.2);border-color:var(--pink);animation:pulse-rec 1.2s infinite}
+  @keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(254,44,85,.5)}50%{box-shadow:0 0 0 8px rgba(254,44,85,0)}}
+  .composer input[type=text]{flex:1;background:var(--panel2);border:1.5px solid var(--line);border-radius:999px;padding:13px 17px;
+    color:var(--txt);font-size:15px;outline:none;transition:.16s;min-width:0}
+  .composer input[type=text]:focus{border-color:rgba(254,44,85,.6);background:#1b1b25}
+  .composer input[type=text]::placeholder{color:#5d5d70}
+  .send{width:46px;height:46px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:18px;
+    background:linear-gradient(135deg,var(--pink),#ff5c7a);box-shadow:0 6px 18px rgba(254,44,85,.35);transition:.15s}
+  .send svg{width:20px;height:20px;stroke-width:2.1}
   .send:active{transform:scale(.92)}
   .send:disabled{opacity:.4;box-shadow:none}
+  .media-preview{position:absolute;left:14px;right:14px;bottom:calc(100% + 6px);display:flex;align-items:center;gap:10px;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .media-preview img{width:52px;height:52px;object-fit:cover;border-radius:9px}
+  .media-preview .txt{font-size:12.5px;color:var(--muted);flex:1}
+  .media-preview .x{width:28px;height:28px;border-radius:50%;background:var(--panel3);display:grid;place-items:center;font-size:14px}
+  .rec-bar{display:flex;align-items:center;gap:10px;flex:1;background:rgba(254,44,85,.12);border:1px solid rgba(254,44,85,.4);
+    border-radius:999px;padding:10px 14px}
+  .rec-dot{width:10px;height:10px;border-radius:50%;background:var(--pink);animation:blink 1s infinite}
+  .rec-time{font-variant-numeric:tabular-nums;font-weight:800;font-size:14px;color:#ff8fa3}
+  .rec-hint{font-size:12px;color:var(--muted);margin-left:auto}
 
-  /* ============ DM LIST ============ */
+  /* ---------- LISTS ---------- */
   .panel-head{padding:14px 16px 6px;font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
   .list{flex:1;overflow-y:auto;padding:6px 10px 16px}
   .convo{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:15px;width:100%;text-align:left;transition:.14s}
@@ -208,52 +185,38 @@
   .convo-name{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .convo-time{margin-left:auto;font-size:10.5px;color:#6a6a7e;flex:0 0 auto}
   .convo-last{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
-  .convo-last b{color:#b9b9c9;font-weight:600}
   .unread{background:var(--pink);color:#fff;font-size:10.5px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 5px;margin-left:6px}
   .empty{padding:44px 24px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
   .empty .big{font-size:40px;display:block;margin-bottom:12px;opacity:.85}
-
-  /* ============ PEOPLE ============ */
   .people{display:flex;flex-direction:column;gap:2px}
   .person{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:14px;width:100%;text-align:left;transition:.14s}
   .person:hover{background:var(--panel2)}
-  .person .ava{width:38px;height:38px;font-size:18px;position:relative}
-  .online-dot{
-    position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;
-    background:var(--ok);border:2.5px solid #0b0b11
-  }
+  .person .ava{width:38px;height:38px;font-size:18px}
+  .online-dot{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--ok);border:2.5px solid #0b0b11}
   .p-body{flex:1;min-width:0}
   .p-name{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .p-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-  .dm-mini{
-    width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:0 0 auto;
-    background:rgba(254,44,85,.14);border:1px solid rgba(254,44,85,.35)
-  }
+  .dm-mini{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:0 0 auto;background:rgba(254,44,85,.14);border:1px solid rgba(254,44,85,.35)}
   .dm-mini:hover{background:rgba(254,44,85,.28)}
+  .dm-mini svg{width:15px;height:15px}
   .side-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
   .side-card h3{margin:2px 4px 10px;font-size:13px;letter-spacing:.3px;display:flex;align-items:center;gap:7px}
   .side-card h3 span{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.05);padding:3px 8px;border-radius:999px}
   .side-scroll{overflow-y:auto;max-height:calc(100dvh - 220px);scrollbar-width:thin}
+  .pin-ico{width:11px;height:11px;vertical-align:-1px;display:inline-block;opacity:.75}
 
-  /* ============ BOTTOM NAV (mobile) ============ */
-  .bottomnav{
-    display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;height:calc(58px + env(safe-area-inset-bottom));
-    padding-bottom:env(safe-area-inset-bottom);background:rgba(8,8,12,.96);backdrop-filter:blur(18px);
-    border-top:1px solid var(--line);align-items:stretch
-  }
+  /* ---------- BOTTOM NAV ---------- */
+  .bottomnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;height:calc(58px + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);background:rgba(8,8,12,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line);align-items:stretch}
   .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:#8b8b9e;position:relative}
-  .bn-item .ico{font-size:20px}
   .bn-item.active{color:#fff}
   .bn-item .dot{position:absolute;top:8px;right:calc(50% - 18px);width:7px;height:7px;border-radius:50%;background:var(--pink)}
 
-  /* ============ SHEET (profil) ============ */
+  /* ---------- SHEET ---------- */
   .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);z-index:80;display:flex;align-items:flex-end;justify-content:center}
   @media(min-width:640px){.backdrop{align-items:center}}
-  .sheet{
-    width:100%;max-width:430px;background:var(--panel);border:1px solid var(--line);
-    border-radius:26px 26px 0 0;padding:22px;animation:up .22s cubic-bezier(.2,.9,.3,1);
-    padding-bottom:calc(22px + env(safe-area-inset-bottom))
-  }
+  .sheet{width:100%;max-width:430px;background:var(--panel);border:1px solid var(--line);border-radius:26px 26px 0 0;padding:22px;
+    animation:up .22s cubic-bezier(.2,.9,.3,1);padding-bottom:calc(22px + env(safe-area-inset-bottom))}
   @media(min-width:640px){.sheet{border-radius:26px;margin:20px}}
   @keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
   .sheet-ava{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:38px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.16)}
@@ -264,18 +227,23 @@
   .stat b{display:block;font-size:16px}
   .stat span{font-size:10.5px;color:var(--muted)}
   .sheet-actions{display:flex;gap:10px}
-  .btn-msg svg{stroke:#fff}
-  .btn-msg{flex:1.6;padding:14px;border-radius:14px;font-weight:800;font-size:15px;background:linear-gradient(135deg,var(--pink),#ff5c7a);color:#fff;box-shadow:0 10px 26px rgba(254,44,85,.3);display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn-msg{flex:1.6;padding:14px;border-radius:14px;font-weight:800;font-size:15px;background:linear-gradient(135deg,var(--pink),#ff5c7a);
+    color:#fff;box-shadow:0 10px 26px rgba(254,44,85,.3);display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn-msg svg{stroke:#fff;width:16px;height:16px}
   .btn-ghost{flex:1;padding:14px;border-radius:14px;font-weight:700;font-size:14px;background:var(--panel2);border:1px solid var(--line)}
+  .sheet-extra{margin-top:10px;display:flex;gap:8px}
+  .sheet-extra button{flex:1;padding:11px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:#c9c9d6}
 
-  .toast{
-    position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);z-index:200;
-    background:#23232f;border:1px solid var(--line);color:#fff;font-size:13px;padding:11px 18px;border-radius:999px;
-    opacity:0;transition:.25s;pointer-events:none;max-width:88vw;text-align:center
-  }
+  /* ---------- TOAST / LIGHTBOX ---------- */
+  .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);z-index:200;background:#23232f;
+    border:1px solid var(--line);color:#fff;font-size:13px;padding:11px 18px;border-radius:999px;opacity:0;transition:.25s;
+    pointer-events:none;max-width:88vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:12px}
+  .lightbox .close{position:absolute;top:18px;right:20px;font-size:30px;color:#fff;opacity:.8}
 
-  /* ============ RESPONSIVE ============ */
+  /* ---------- RESPONSIVE ---------- */
   @media(max-width:1000px){
     .rightbar{display:none}
     .sidebar{width:78px;padding:16px 8px}
@@ -285,35 +253,38 @@
     .nav-item.active::before{display:none}
     .nav-badge{position:absolute;top:6px;right:6px;margin:0;min-width:16px;height:16px;font-size:9.5px}
   }
-  @media(max-width:430px){
-    .row2{grid-template-columns:1fr;gap:9px}
-    .row2 .chips{flex-wrap:wrap}
-    .field{padding:13px 14px}
-    .logo-txt{font-size:21px}
-  }
   @media(max-width:760px){
     .sidebar{display:none}
     .main{height:100dvh}
     .content{border-right:0}
     .bottomnav{display:flex}
     .feed{padding:14px 12px 8px}
-    .composer{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
     .views{padding-bottom:calc(58px + env(safe-area-inset-bottom))}
     .bwrap{max-width:80%}
     .sheet{max-width:100%}
+    .online-pill{font-size:11px;padding:5px 9px}
+    .persist{display:none}
+  }
+  @media(max-width:430px){
+    .row2{grid-template-columns:1fr;gap:9px}
+    .row2 .chips{flex-wrap:wrap}
+    .field{padding:13px 14px}
+    .logo-txt{font-size:21px}
+    .cbtn{width:38px;height:38px}
+    .send{width:42px;height:42px}
   }
 </style>
 </head>
 <body>
 
 <!-- ===================== GİRİŞ ===================== -->
-<div class="auth" id="auth">
+<div class="auth hidden" id="auth">
   <div class="auth-card">
     <div class="logo">
       <div class="logo-mark">💬</div>
       <div class="logo-txt">Yerel <span>Dedikodu</span></div>
     </div>
-    <p class="tagline">Türkiye'nin her yerinden canlı dedikodu.<br>Yaz, anında gitsin — özelden de konuş.</p>
+    <p class="tagline">Türkiye'nin her yerinden canlı dedikodu.<br>Yaz, fotoğraf at, ses kaydet — özelden de konuş.</p>
 
     <p class="field-label">Kullanıcı adın</p>
     <input class="field" id="inName" maxlength="24" placeholder="ör. kral_adam" autocomplete="nickname" />
@@ -342,36 +313,35 @@
     </div>
 
     <button class="btn-primary" id="btnEnter">Sohbete gir →</button>
-    <p class="auth-note">Aynı linke giren herkes seni görür. Farklı cihazlardan girip test edebilirsin 🔥</p>
+    <p class="auth-note">Bir kez gir, bir daha sormaz. Aynı linke giren herkes seni görür 🔥</p>
   </div>
 </div>
 
 <!-- ===================== UYGULAMA ===================== -->
 <div class="main hidden" id="main">
-  <!-- sol menü -->
   <aside class="sidebar">
     <div class="side-brand">
       <div class="logo-mark">💬</div>
-      <div class="logo-txt">Yerel <span style="background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent">Dedikodu</span></div>
+      <div class="logo-txt">Yerel <span>Dedikodu</span></div>
     </div>
-    <button class="nav-item active" data-tab="feed"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.6 9.4V21h12.8V9.4"/></svg></span><span class="txt">Akış</span></button>
-    <button class="nav-item" data-tab="messages"><span class="ico"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg></span><span class="txt">Mesajlar</span><span class="nav-badge hidden" id="badgeSide">0</span></button>
-    <button class="nav-item" data-tab="people"><span class="ico"><svg viewBox="0 0 24 24"><path d="M16.5 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.3" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg></span><span class="txt">Kişiler</span></button>
-    <button class="nav-item" data-tab="me"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-1a7.5 7.5 0 0 1 15 0v1"/></svg></span><span class="txt">Profilim</span></button>
+    <button class="nav-item active" data-tab="feed"><span class="ico" id="icoHome"></span><span class="txt">Akış</span></button>
+    <button class="nav-item" data-tab="messages"><span class="ico" id="icoChat"></span><span class="txt">Mesajlar</span><span class="nav-badge hidden" id="badgeSide">0</span></button>
+    <button class="nav-item" data-tab="people"><span class="ico" id="icoUsers"></span><span class="txt">Kişiler</span></button>
+    <button class="nav-item" data-tab="me"><span class="ico" id="icoUser"></span><span class="txt">Profilim</span></button>
     <div class="side-foot">
-      <button class="invite-btn" id="inviteBtn"><svg viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M10 13.5a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 5.4"/><path d="M14 10.5a5 5 0 0 0-7.1 0L4.5 12.9a5 5 0 0 0 7.1 7.1L13 18.6"/></svg><span>Davet linkini kopyala</span></button>
+      <button class="invite-btn" id="inviteBtn"><span id="icoLink"></span><span>Davet linkini kopyala</span></button>
     </div>
   </aside>
 
-  <!-- orta alan -->
   <section class="content">
     <header class="topbar">
       <button class="back-btn hidden" id="backBtn">‹</button>
-      <div>
+      <div style="min-width:0">
         <div class="top-title" id="topTitle"><span class="live-dot"></span> Canlı Akış</div>
         <div class="top-sub" id="topSub">Bağlanıyor…</div>
       </div>
       <div class="top-right">
+        <span class="online-pill" id="onlinePill"><i></i><b id="onlineNum">0</b>&nbsp;çevrimiçi</span>
         <span class="persist" id="persistBadge" data-on="0" title="Kontrol ediliyor…">💾</span>
         <button class="mini-ava" id="myAva">😎</button>
       </div>
@@ -383,8 +353,22 @@
         <div class="feed" id="feed"></div>
         <div class="typing-line" id="typingGlobal"></div>
         <div class="composer" id="composerGlobal">
-          <input id="inGlobal" maxlength="500" placeholder="Genel sohbete bir şeyler yaz…" autocomplete="off" />
-          <button class="send" id="sendGlobal"><svg viewBox="0 0 24 24"><path d="M4 12 20.5 4l-6.7 16.5-2.3-6.4L4 12Z"/></svg></button>
+          <div class="media-preview hidden" id="mediaPreview">
+            <img id="mediaPreviewImg" alt="" />
+            <div class="txt" id="mediaPreviewTxt">Fotoğraf hazır</div>
+            <button class="x" id="mediaCancel">✕</button>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" class="hidden" />
+          <button class="cbtn" id="btnPhoto" title="Fotoğraf gönder"><span id="icoCam"></span></button>
+          <button class="cbtn" id="btnMic" title="Ses kaydı"><span id="icoMic"></span></button>
+          <input type="text" id="inGlobal" maxlength="500" placeholder="Genel sohbete bir şeyler yaz…" autocomplete="off" />
+          <div class="rec-bar hidden" id="recBar">
+            <span class="rec-dot"></span>
+            <span class="rec-time" id="recTime">0:00</span>
+            <span class="rec-hint">kaydediliyor…</span>
+            <button class="cbtn" id="recStop" style="width:34px;height:34px">■</button>
+          </div>
+          <button class="send" id="sendGlobal"><span id="icoSend"></span></button>
         </div>
       </div>
 
@@ -399,13 +383,21 @@
           <div class="feed" id="dmFeed"></div>
           <div class="typing-line" id="typingDm"></div>
           <div class="composer" id="composerDm">
-            <input id="inDm" maxlength="500" placeholder="Özel mesaj yaz…" autocomplete="off" />
-            <button class="send" id="sendDm"><svg viewBox="0 0 24 24"><path d="M4 12 20.5 4l-6.7 16.5-2.3-6.4L4 12Z"/></svg></button>
+            <div class="media-preview hidden" id="mediaPreviewDm">
+              <img id="mediaPreviewImgDm" alt="" />
+              <div class="txt" id="mediaPreviewTxtDm">Fotoğraf hazır</div>
+              <button class="x" id="mediaCancelDm">✕</button>
+            </div>
+            <input type="file" id="fileInputDm" accept="image/*" class="hidden" />
+            <button class="cbtn" id="btnPhotoDm" title="Fotoğraf gönder"><span id="icoCam2"></span></button>
+            <button class="cbtn" id="btnMicDm" title="Ses kaydı"><span id="icoMic2"></span></button>
+            <input type="text" id="inDm" maxlength="500" placeholder="Özel mesaj yaz…" autocomplete="off" />
+            <button class="send" id="sendDm"><span id="icoSend2"></span></button>
           </div>
         </div>
       </div>
 
-      <!-- KİŞİLER (mobil) -->
+      <!-- KİŞİLER -->
       <div class="view hidden" id="viewPeople">
         <div class="panel-head">Çevrimiçi olanlar</div>
         <div class="list"><div class="people" id="peopleMobile"></div></div>
@@ -413,7 +405,6 @@
     </div>
   </section>
 
-  <!-- sağ panel -->
   <aside class="rightbar">
     <div class="side-card" style="flex:1">
       <h3>👥 Aktif kişiler <span id="onlineCount">0 çevrimiçi</span></h3>
@@ -422,15 +413,13 @@
   </aside>
 </div>
 
-<!-- mobil alt menü -->
 <nav class="bottomnav hidden" id="bottomNav">
-  <button class="bn-item active" data-tab="feed"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.6 9.4V21h12.8V9.4"/></svg></span>Akış</button>
-  <button class="bn-item" data-tab="messages"><span class="ico"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg></span>Mesajlar<span class="dot hidden" id="badgeDot"></span></button>
-  <button class="bn-item" data-tab="people"><span class="ico"><svg viewBox="0 0 24 24"><path d="M16.5 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.3" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg></span>Kişiler</button>
-  <button class="bn-item" data-tab="me"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-1a7.5 7.5 0 0 1 15 0v1"/></svg></span>Profil</button>
+  <button class="bn-item active" data-tab="feed"><span class="ico" id="bnHome"></span>Akış</button>
+  <button class="bn-item" data-tab="messages"><span class="ico" id="bnChat"></span>Mesajlar<span class="dot hidden" id="badgeDot"></span></button>
+  <button class="bn-item" data-tab="people"><span class="ico" id="bnUsers"></span>Kişiler</button>
+  <button class="bn-item" data-tab="me"><span class="ico" id="bnUser"></span>Profil</button>
 </nav>
 
-<!-- profil sheet -->
 <div class="backdrop hidden" id="backdrop">
   <div class="sheet">
     <div class="sheet-ava" id="sheetAva">😎</div>
@@ -445,6 +434,10 @@
       <button class="btn-msg" id="sheetMsg">✉️ Mesaj gönder</button>
       <button class="btn-ghost" id="sheetClose">Kapat</button>
     </div>
+    <div class="sheet-extra hidden" id="sheetExtra">
+      <button id="btnRename">✏️ Adımı değiştir</button>
+      <button id="btnLogout">🚪 Çıkış yap</button>
+    </div>
   </div>
 </div>
 
@@ -455,12 +448,13 @@
 (() => {
   'use strict';
 
-  /* ---------------- yardımcılar ---------------- */
+  /* ================= yardımcılar ================= */
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
   };
   const fmtTime = (ts) => new Date(ts || Date.now()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   const fmtAgo = (ts) => {
@@ -474,17 +468,32 @@
   const COLORS = ['#fe2c55','#7d2bff','#25f4ee','#ff8a00','#2ee6a8','#ff4fa3','#4f8bff','#ffd60a','#ff5c00','#b14eff'];
   const EMOJIS = ['😎','🔥','🐺','🦁','🌙','🎧','😈','🌹','⚡','🐉','👑','🍀','🎮','🚀','🐻','💫'];
   const avaStyle = (c) => `background:linear-gradient(150deg,${c},${c}44);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)`;
-  const PIN = '<svg class="pin-ico" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
-  const PENCIL = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-  const CHAT_SM = '<svg viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
+
+  const ICONS = {
+    home: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.6 9.4V21h12.8V9.4"/></svg>',
+    chat: '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>',
+    users: '<svg viewBox="0 0 24 24"><path d="M16.5 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.3" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg>',
+    user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-1a7.5 7.5 0 0 1 15 0v1"/></svg>',
+    send: '<svg viewBox="0 0 24 24"><path d="M4 12 20.5 4l-6.7 16.5-2.3-6.4L4 12Z"/></svg>',
+    cam: '<svg viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7a2 2 0 0 0 1.7-1l.4-.6A2 2 0 0 1 11 3.5h2a2 2 0 0 1 1.7.9l.4.6a2 2 0 0 0 1.7 1h1.7A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-9Z"/><circle cx="12" cy="13" r="3.6"/></svg>',
+    mic: '<svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.5"/></svg>',
+    link: '<svg viewBox="0 0 24 24"><path d="M10 13.5a5 5 0 0 0 7.1 0l2.4-2.4a5 5 0 0 0-7.1-7.1L11 5.4"/><path d="M14 10.5a5 5 0 0 0-7.1 0L4.5 12.9a5 5 0 0 0 7.1 7.1L13 18.6"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" style="width:13px;height:13px;display:inline-block;vertical-align:-2px"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6 7l1 13h10l1-13"/></svg>',
+    pin: '<svg class="pin-ico" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  };
+  const PENCIL = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;display:inline-block"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  const CHAT_SM = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;display:inline-block"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
+
+  // ikonları yerleştir
+  const put = (id, name) => { const el = document.getElementById(id); if (el) el.innerHTML = ICONS[name]; };
+  ['icoHome:home','icoChat:chat','icoUsers:users','icoUser:user','icoLink:link','icoSend:send','icoSend2:send',
+   'icoCam:cam','icoCam2:cam','icoMic:mic','icoMic2:mic','bnHome:home','bnChat:chat','bnUsers:users','bnUser:user']
+    .forEach((x) => { const [id, n] = x.split(':'); put(id, n); });
 
   let toastT;
   function toast(msg) {
-    const t = $('#toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastT);
-    toastT = setTimeout(() => t.classList.remove('show'), 2200);
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
   }
 
   let audioCtx;
@@ -493,28 +502,24 @@
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const o = audioCtx.createOscillator(), g = audioCtx.createGain();
       o.type = 'sine'; o.frequency.value = freq;
-      g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.05, audioCtx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.26);
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start(); o.stop(audioCtx.currentTime + 0.27);
+      o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.27);
     } catch (e) {}
   }
 
-  /* ---------------- durum ---------------- */
+  /* ================= durum ================= */
   const state = {
-    me: null,
-    tab: 'feed',
-    users: [],
-    onlineCount: 0,
-    convos: new Map(), // peerId -> {peer, messages:[], unread:0, updated}
-    activeDm: null,
-    typingGlobal: new Map(), // from -> {name, ts}
-    typingDm: new Map(),
-    profileTarget: null,
-    msgCounts: new Map(), // userId -> mesaj sayısı (bu oturumda)
-    persistent: false,  // sohbet geçmişi kalıcı mı
+    me: null, tab: 'feed', users: [], onlineCount: 0,
+    convos: new Map(), activeDm: null,
+    typingGlobal: new Map(), typingDm: new Map(),
+    msgCounts: new Map(), persistent: false,
+    peerRead: new Map(),       // peerId -> ts
+    pending: { dataUrl: null },// seçilen fotoğraf
+    scope: 'global',           // hangi composer aktif
   };
 
+  /* ================= auth ================= */
   const emojiGrid = $('#emojiGrid');
   let pickedEmoji = store.get('st_emoji', '😎');
   if (!EMOJIS.includes(pickedEmoji)) pickedEmoji = '😎';
@@ -528,60 +533,33 @@
     b.onclick = () => {
       pickedEmoji = e;
       [...emojiGrid.children].forEach((c) => c.classList.remove('sel'));
-      b.classList.add('sel');
-      paintPreview();
+      b.classList.add('sel'); paintPreview();
     };
     emojiGrid.appendChild(b);
   });
 
   function paintPreview() {
-    $('#pvAva').textContent = pickedEmoji;
-    $('#pvAva').style.cssText = 'width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:0 0 auto;' + avaStyle(pickedColor);
+    const pv = $('#pvAva');
+    pv.textContent = pickedEmoji;
+    pv.style.cssText = 'width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;flex:0 0 auto;' + avaStyle(pickedColor);
     $('#pvName').textContent = ($('#inName').value.trim() || 'Misafir');
     $('#pvSub').textContent = $('#inCity').value.trim() || 'Şehir seçilmedi';
   }
   $('#inName').addEventListener('input', paintPreview);
   $('#inCity').addEventListener('input', paintPreview);
-  $('#recolor').onclick = () => {
-    pickedColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-    paintPreview();
-  };
+  $('#recolor').onclick = () => { pickedColor = COLORS[Math.floor(Math.random() * COLORS.length)]; paintPreview(); };
   document.querySelectorAll('[data-city]').forEach((b) => {
     b.onclick = () => { $('#inCity').value = b.dataset.city; paintPreview(); };
   });
 
-  const savedProfile = store.get('st_profile', null);
-  if (savedProfile) {
-    $('#inName').value = savedProfile.name || '';
-    $('#inCity').value = savedProfile.city || '';
-    if (savedProfile.emoji) pickedEmoji = savedProfile.emoji;
-    if (savedProfile.color) pickedColor = savedProfile.color;
-  }
-  paintPreview();
-
-  /* ---------------- socket ---------------- */
   function getUserId() {
     let id = store.get('st_uid', null);
-    if (!id) {
-      id = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-      store.set('st_uid', id);
-    }
+    if (!id) { id = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); store.set('st_uid', id); }
     return id;
   }
 
   let socket = null;
   let joined = false;
-
-  $('#btnEnter').onclick = () => {
-    const name = $('#inName').value.trim();
-    if (name.length < 2) { toast('En az 2 karakterlik bir kullanıcı adı yaz 🙂'); return; }
-    const profile = { name, city: $('#inCity').value.trim(), emoji: pickedEmoji, color: pickedColor };
-    store.set('st_profile', profile);
-    store.set('st_emoji', pickedEmoji);
-    store.set('st_color', pickedColor);
-    enterApp(profile);
-  };
-  $('#inName').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btnEnter').click(); });
 
   function enterApp(profile) {
     $('#auth').classList.add('hidden');
@@ -590,27 +568,47 @@
     connect(profile);
   }
 
+  $('#btnEnter').onclick = () => {
+    const name = $('#inName').value.trim();
+    if (name.length < 2) { toast('En az 2 karakterlik bir kullanıcı adı yaz 🙂'); return; }
+    const profile = { name, city: $('#inCity').value.trim(), emoji: pickedEmoji, color: pickedColor };
+    store.set('st_profile', profile); store.set('st_emoji', pickedEmoji); store.set('st_color', pickedColor);
+    enterApp(profile);
+  };
+  $('#inName').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btnEnter').click(); });
+
+  /* ---- OTOMATİK GİRİŞ: kayıtlı profil varsa isim sormaz ---- */
+  const savedProfile = store.get('st_profile', null);
+  if (savedProfile && savedProfile.name && savedProfile.name.length >= 2) {
+    if (savedProfile.emoji) pickedEmoji = savedProfile.emoji;
+    if (savedProfile.color) pickedColor = savedProfile.color;
+    $('#inName').value = savedProfile.name;
+    $('#inCity').value = savedProfile.city || '';
+    paintPreview();
+    enterApp(savedProfile);
+    setTimeout(() => toast('Tekrar hoş geldin ' + savedProfile.name + ' 👋'), 1400);
+  } else {
+    $('#auth').classList.remove('hidden');
+    paintPreview();
+  }
+
+  /* ================= socket ================= */
   function connect(profile) {
     if (socket) { try { socket.disconnect(); } catch (e) {} }
     socket = io({ transports: ['websocket', 'polling'], reconnection: true });
 
     socket.on('connect', () => {
       socket.emit('hello', {
-        userId: getUserId(),
-        name: profile.name,
-        city: profile.city,
-        emoji: profile.emoji,
-        color: profile.color,
+        userId: getUserId(), name: profile.name, city: profile.city,
+        emoji: profile.emoji, color: profile.color,
       });
     });
 
-    fetch('/health').then(r => r.json()).then(h => {
+    fetch('/health').then((r) => r.json()).then((h) => {
       state.persistent = !!h.persistent;
       const el = $('#persistBadge');
       if (el) {
-        el.title = h.persistent
-          ? 'Sohbet geçmişi veritabanına kaydediliyor — silinmez'
-          : 'Geçmiş kalıcı değil (veritabanı bağlı değil)';
+        el.title = h.persistent ? 'Sohbet geçmişi veritabanına kaydediliyor — silinmez' : 'Geçmiş kalıcı değil (veritabanı bağlı değil)';
         el.dataset.on = h.persistent ? '1' : '0';
       }
     }).catch(() => {});
@@ -624,18 +622,15 @@
       a.textContent = user.emoji;
       a.style.cssText = avaStyle(user.color) + ';width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:1.5px solid rgba(255,255,255,.15)';
       a.onclick = () => openProfile(user.id);
-      if (!joined) {
-        joined = true;
-        $('#topSub').textContent = 'Bağlandı · ' + user.name;
-      }
+      if (!joined) { joined = true; $('#topSub').textContent = 'Bağlandı · ' + user.name; }
     });
 
     socket.on('presence', (p) => {
       state.users = p.users || [];
       state.onlineCount = p.online || 0;
-      renderPeople();
-      renderDmList();
-      updateHeader();
+      renderPeople(); renderDmList(); updateHeader();
+      $('#onlineNum').textContent = state.onlineCount;
+      $('#onlineCount').textContent = state.onlineCount + ' çevrimiçi';
     });
 
     socket.on('global:history', (msgs) => {
@@ -643,7 +638,6 @@
       (msgs || []).forEach((m) => appendGlobal(m, true));
       scrollFeed(true);
     });
-
     socket.on('global:new', (m) => {
       appendGlobal(m, false);
       if (m.kind !== 'system' && (!state.me || m.from !== state.me.id)) beep(760);
@@ -659,14 +653,16 @@
           updated: item.updated || 0,
           last: item.last || null,
         });
+        if (item.peerRead) state.peerRead.set(item.peerId, item.peerRead);
       });
       renderDmList();
     });
 
-    socket.on('dm:history', ({ peerId, messages }) => {
+    socket.on('dm:history', ({ peerId, messages, peerRead }) => {
       const c = ensureConvo(peerId);
       c.messages = messages || [];
-      if (state.activeDm === peerId) renderThread();
+      if (peerRead) state.peerRead.set(peerId, peerRead);
+      if (state.activeDm === peerId) { renderThread(); markRead(peerId); }
       renderDmList();
     });
 
@@ -678,42 +674,137 @@
         renderPeople();
       }
       const c = ensureConvo(peerId);
-      c.messages.push(m);
-      c.updated = m.ts;
-      c.last = m;
+      c.messages.push(m); c.updated = m.ts; c.last = m;
       bumpCount(m.from);
       const mine = state.me && m.from === state.me.id;
       if (state.activeDm === peerId) {
-        appendDm(m);
-        renderDmList();
+        appendDm(m); renderDmList();
+        if (!mine) markRead(peerId);
       } else {
         if (!mine) {
           c.unread = (c.unread || 0) + 1;
           beep(920);
-          if (state.tab !== 'messages') toast('✉️ ' + m.name + ': ' + m.text.slice(0, 40));
+          if (state.tab !== 'messages') toast('✉️ ' + m.name + ': ' + previewText(m));
         }
         renderDmList();
       }
+    });
+
+    // görüldü bilgisi
+    socket.on('dm:read', ({ by, ts }) => {
+      state.peerRead.set(by, ts);
+      if (state.activeDm === by) renderThread(true);
+      renderDmList();
+    });
+
+    // silinen mesaj
+    socket.on('msg:deleted', ({ id }) => {
+      ['#feed', '#dmFeed'].forEach((sel) => {
+        const el = document.querySelector(`${sel} [data-id="${id}"]`);
+        if (el) markDeleted(el);
+      });
     });
 
     socket.on('typing', (info) => {
       if (info.scope === 'dm') {
         if (state.activeDm !== info.from) return;
         state.typingDm.set(info.from, { name: info.name, ts: Date.now() });
-        renderTyping();
       } else {
         state.typingGlobal.set(info.from, { name: info.name, ts: Date.now() });
-        renderTyping();
       }
+      renderTyping();
     });
 
     socket.on('err', ({ message }) => toast(message));
-    socket.on('disconnect', () => { $('#topSub').textContent = 'Bağlantı koptu, tekrar deneniyor…'; setTimeout(() => { if (socket.connected) $('#topSub').textContent = 'Bağlandı'; }, 1500); });
+    socket.on('disconnect', () => { $('#topSub').textContent = 'Bağlantı koptu, tekrar deneniyor…'; });
+    socket.on('connect', () => { if (joined) $('#topSub').textContent = 'Bağlandı'; });
   }
 
-  /* ---------------- akış ---------------- */
-  function bumpCount(userId) {
-    state.msgCounts.set(userId, (state.msgCounts.get(userId) || 0) + 1);
+  /* ================= yardımcı render ================= */
+  function previewText(m) {
+    if (m.deleted) return 'mesaj silindi';
+    if (m.image) return '📷 Fotoğraf';
+    if (m.audio) return '🎤 Ses kaydı';
+    return (m.text || '').slice(0, 40);
+  }
+  function bumpCount(id) { state.msgCounts.set(id, (state.msgCounts.get(id) || 0) + 1); }
+  function findUser(id) { return state.users.find((u) => u.id === id) || null; }
+
+  function bubbleInner(m) {
+    if (m.deleted) return { cls: ' deleted', html: '🚫 Bu mesaj silindi' };
+    let cls = '';
+    let html = '';
+    if (m.image) {
+      cls = ' media';
+      html += `<img class="photo" src="${esc(m.image)}" alt="fotoğraf" loading="lazy" data-full="${esc(m.image)}" />`;
+    }
+    if (m.audio) {
+      cls = ' media';
+      html += `<div class="audio-wrap"><span class="audio-ico">🎤</span><audio controls preload="none" src="${esc(m.audio)}"></audio></div>`;
+    }
+    if (m.text) html += `<div style="${m.image || m.audio ? 'padding:6px 8px 2px' : ''}">${esc(m.text)}</div>`;
+    return { cls, html };
+  }
+
+  function messageRow(m, scope) {
+    const mine = state.me && m.from === state.me.id;
+    const row = document.createElement('div');
+    row.className = 'msg' + (mine ? ' mine' : '');
+    row.dataset.id = m.id;
+    row.dataset.scope = scope;
+    row.dataset.ts = m.ts;
+    const b = bubbleInner(m);
+    const delBtn = mine && !m.deleted
+      ? `<button class="del-btn" title="Sil" data-del="${esc(m.id)}">${ICONS.trash}</button>`
+      : '';
+    const receipt = (scope === 'dm' && mine && !m.deleted)
+      ? `<div class="receipt" data-ts="${m.ts}">✓ Gönderildi</div>`
+      : '';
+    row.innerHTML = `
+      <button class="ava" style="${avaStyle(m.color)}">${esc(m.emoji)}</button>
+      <div class="bwrap">
+        <div class="meta">
+          <span class="nm">${esc(m.name)}</span>
+          ${m.city ? `<span class="city">${ICONS.pin} ${esc(m.city)}</span>` : ''}
+          <span class="tm">${fmtTime(m.ts)}</span>
+          ${delBtn}
+        </div>
+        <div class="bubble${b.cls}">${b.html}</div>
+        ${receipt}
+      </div>`;
+    row.querySelector('.ava').onclick = () => openProfile(m.from);
+    row.querySelector('.nm').onclick = () => openProfile(m.from);
+    const db = row.querySelector('[data-del]');
+    if (db) db.onclick = () => askDelete(m.id, scope);
+    const photo = row.querySelector('.photo');
+    if (photo) photo.onclick = () => openLightbox(photo.dataset.full || photo.src);
+    return row;
+  }
+
+  function markDeleted(el) {
+    el.classList.remove('mine'); // stil aynı kalsın diye dokunmuyoruz, sadece içerik
+    const wrap = el.querySelector('.bwrap');
+    fromNowClean: {
+      const oldB = el.querySelector('.bubble');
+      if (oldB) {
+        oldB.className = el.classList.contains('mine') ? 'bubble deleted' : 'bubble deleted';
+        oldB.innerHTML = '🚫 Bu mesaj silindi';
+      }
+      const del = el.querySelector('.del-btn');
+      if (del) del.remove();
+      const rc = wrap && wrap.querySelector('.receipt');
+      if (rc) rc.remove();
+      const ph = el.querySelector('.photo');
+      if (ph) ph.remove();
+      const au = el.querySelector('audio');
+      if (au) { try { au.pause(); } catch (e) {} au.remove(); }
+    }
+  }
+
+  function scrollFeed(force) {
+    const feed = $('#feed');
+    const near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 240;
+    if (force || near) feed.scrollTop = feed.scrollHeight;
   }
 
   function appendGlobal(m, silent) {
@@ -727,52 +818,200 @@
       return;
     }
     bumpCount(m.from);
-    const mine = state.me && m.from === state.me.id;
-    const row = document.createElement('div');
-    row.className = 'msg' + (mine ? ' mine' : '');
-    row.innerHTML = `
-      <button class="ava" style="${avaStyle(m.color)}">${esc(m.emoji)}</button>
-      <div class="bwrap">
-        <div class="meta">
-          <span class="nm">${esc(m.name)}</span>
-          ${m.city ? `<span class="city">${PIN} ${esc(m.city)}</span>` : ''}
-          <span class="tm">${fmtTime(m.ts)}</span>
-        </div>
-        <div class="bubble">${esc(m.text)}</div>
-      </div>`;
-    row.querySelector('.ava').onclick = () => openProfile(m.from);
-    row.querySelector('.nm').onclick = () => openProfile(m.from);
-    feed.appendChild(row);
-    if (!silent) { scrollFeed(); beep; }
+    feed.appendChild(messageRow(m, 'global'));
+    if (!silent) scrollFeed();
   }
 
-  function scrollFeed(force) {
-    const feed = $('#feed');
-    const near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 220;
-    if (force || near) feed.scrollTop = feed.scrollHeight;
-  }
+  /* ================= gönderme ================= */
+  function currentScope() { return state.tab === 'messages' && state.activeDm ? 'dm' : 'global'; }
 
-  function sendGlobal() {
-    const input = $('#inGlobal');
+  function sendMessage(scope) {
+    const isDm = scope === 'dm';
+    const input = isDm ? $('#inDm') : $('#inGlobal');
     const text = input.value.trim();
-    if (!text) return;
+    const image = state.pending.dataUrl;
+    if (!text && !image) return;
     if (!socket || !socket.connected) { toast('Bağlantı yok, biraz bekle…'); return; }
-    socket.emit('global:send', { text });
+
+    const payload = { text };
+    if (image) payload.image = image;
+
+    if (isDm) {
+      if (!state.activeDm) return;
+      socket.emit('dm:send', { to: state.activeDm, ...payload });
+    } else {
+      socket.emit('global:send', payload);
+    }
     input.value = '';
+    clearPending();
     input.focus();
   }
-  $('#sendGlobal').onclick = sendGlobal;
-  $('#inGlobal').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendGlobal(); });
+
+  $('#sendGlobal').onclick = () => sendMessage('global');
+  $('#sendDm').onclick = () => sendMessage('dm');
+  $('#inGlobal').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('global'); });
+  $('#inDm').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage('dm'); });
 
   let lastType = 0;
-  $('#inGlobal').addEventListener('input', () => {
+  function emitTyping(scope) {
     const now = Date.now();
     if (now - lastType < 1200) return;
     lastType = now;
-    if (socket) socket.emit('typing', {});
-  });
+    if (!socket) return;
+    if (scope === 'dm' && state.activeDm) socket.emit('typing', { to: state.activeDm });
+    else socket.emit('typing', {});
+  }
+  $('#inGlobal').addEventListener('input', () => emitTyping('global'));
+  $('#inDm').addEventListener('input', () => emitTyping('dm'));
 
-  /* ---------------- kişiler ---------------- */
+  /* ================= foto seçme ================= */
+  function compressImage(file, maxSide = 1280, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width: w, height: h } = img;
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  let pending = null;
+  function setPending(dataUrl) {
+    state.pending.dataUrl = dataUrl;
+    ['#mediaPreview', '#mediaPreviewDm'].forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      el.classList.toggle('hidden', !dataUrl);
+      const im = el.querySelector('img');
+      if (im && dataUrl) im.src = dataUrl;
+    });
+  }
+  function clearPending() { setPending(null); }
+
+  function handleFile(file, scope) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Sadece fotoğraf gönderebilirsin'); return; }
+    if (file.size > 12 * 1024 * 1024) { toast('Fotoğraf çok büyük (max 12 MB)'); return; }
+    compressImage(file).then((d) => {
+      setPending(d);
+      const txt = document.querySelector(scope === 'dm' ? '#mediaPreviewTxtDm' : '#mediaPreviewTxt');
+      if (txt) txt.textContent = 'Fotoğraf hazır — göndermek için ➤';
+    }).catch(() => toast('Fotoğraf açılamadı'));
+  }
+
+  $('#btnPhoto').onclick = () => $('#fileInput').click();
+  $('#btnPhotoDm').onclick = () => $('#fileInputDm').click();
+  $('#fileInput').onchange = (e) => { handleFile(e.target.files[0], 'global'); e.target.value = ''; };
+  $('#fileInputDm').onchange = (e) => { handleFile(e.target.files[0], 'dm'); e.target.value = ''; };
+  $('#mediaCancel').onclick = clearPending;
+  $('#mediaCancelDm').onclick = clearPending;
+
+  /* ================= ses kaydı ================= */
+  let rec = { media: null, chunks: [], stream: null, timer: null, start: 0, cancel: false };
+
+  async function startRecording(scope) {
+    if (!navigator.mediaDevices || !window.MediaRecorder) { toast('Tarayıcın ses kaydını desteklemiyor 😕'); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm'
+        : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
+      rec = { media: new MediaRecorder(stream, mime ? { mimeType: mime } : undefined), chunks: [], stream, timer: null, start: Date.now(), cancel: false };
+      rec.media.ondataavailable = (e) => { if (e.data.size) rec.chunks.push(e.data); };
+      rec.media.onstop = () => {
+        const secs = (Date.now() - rec.start) / 1000;
+        const cancelled = rec.cancel;
+        rec.stream.getTracks().forEach((t) => t.stop());
+        clearInterval(rec.timer);
+        $('#recBar').classList.add('hidden');
+        ['#inGlobal', '#inDm'].forEach((s) => { const el = document.querySelector(s); if (el) el.classList.remove('hidden'); });
+        document.querySelectorAll('#btnMic, #btnMicDm').forEach((b) => b.classList.remove('rec'));
+        if (cancelled) return;
+        if (secs < 0.7) { toast('Kayıt çok kısa 🎤'); return; }
+        const blob = new Blob(rec.chunks, { type: rec.media.mimeType || 'audio/webm' });
+        if (blob.size > 2.4 * 1024 * 1024) { toast('Ses kaydı çok uzun (max ~1 dk)'); return; }
+        const fr = new FileReader();
+        fr.onload = () => {
+          if (!socket || !socket.connected) { toast('Bağlantı yok'); return; }
+          if (scope === 'dm') { if (state.activeDm) socket.emit('dm:send', { to: state.activeDm, audio: fr.result }); }
+          else socket.emit('global:send', { audio: fr.result });
+        };
+        fr.readAsDataURL(blob);
+      };
+      rec.media.start();
+      $('#recBar').classList.remove('hidden');
+      ['#inGlobal', '#inDm'].forEach((s) => { const el = document.querySelector(s); if (el) el.classList.add('hidden'); });
+      document.querySelectorAll('#btnMic, #btnMicDm').forEach((b) => b.classList.add('rec'));
+      const t0 = Date.now();
+      rec.timer = setInterval(() => {
+        const d = Math.floor((Date.now() - t0) / 1000);
+        $('#recTime').textContent = Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
+        if (d >= 60) stopRecording(false); // max 1 dk
+      }, 200);
+    } catch (e) {
+      toast('Mikrofon izni verilmedi 🎤');
+    }
+  }
+
+  function stopRecording(cancel) {
+    if (!rec.media || rec.media.state === 'inactive') return;
+    rec.cancel = !!cancel;
+    try { rec.media.stop(); } catch (e) {}
+  }
+
+  $('#btnMic').onclick = () => {
+    if (rec.media && rec.media.state === 'recording') stopRecording(false);
+    else startRecording('global');
+  };
+  $('#btnMicDm').onclick = () => {
+    if (rec.media && rec.media.state === 'recording') stopRecording(false);
+    else startRecording('dm');
+  };
+  $('#recStop').onclick = () => stopRecording(false);
+
+  /* ================= silme ================= */
+  function askDelete(id, scope) {
+    if (!confirm('Bu mesajı herkes için silmek istiyor musun?')) return;
+    if (socket) socket.emit('msg:delete', { id, scope });
+  }
+
+  /* ================= lightbox ================= */
+  function openLightbox(src) {
+    const lb = document.createElement('div');
+    lb.className = 'lightbox';
+    lb.innerHTML = `<button class="close">✕</button><img src="${esc(src)}" alt="" />`;
+    lb.onclick = () => lb.remove();
+    document.body.appendChild(lb);
+  }
+
+  /* ================= görüldü ================= */
+  function markRead(peerId) {
+    if (!socket || !peerId) return;
+    socket.emit('dm:read', { peerId });
+  }
+
+  function updateReceipts() {
+    const peer = state.activeDm;
+    if (!peer) return;
+    const ts = state.peerRead.get(peer) || 0;
+    document.querySelectorAll('#dmFeed .receipt').forEach((el) => {
+      const mts = Number(el.dataset.ts || 0);
+      if (ts >= mts) { el.classList.add('seen'); el.textContent = '✓✓ Görüldü'; }
+      else { el.classList.remove('seen'); el.textContent = '✓ Gönderildi'; }
+    });
+  }
+
+  /* ================= kişiler ================= */
   function personNode(u) {
     const b = document.createElement('button');
     b.className = 'person';
@@ -781,7 +1020,7 @@
       <div class="ava" style="${avaStyle(u.color)}">${esc(u.emoji)}${u.online ? '<span class="online-dot"></span>' : ''}</div>
       <div class="p-body">
         <div class="p-name">${esc(u.name)}${isMe ? ' <span style="color:#8b8b9e;font-weight:600">(sen)</span>' : ''}</div>
-        <div class="p-sub">${u.city ? PIN + ' ' + esc(u.city) + ' · ' : ''}${u.online ? '<span style="color:#2ee6a8">çevrimiçi</span>' : fmtAgo(u.lastSeen)}</div>
+        <div class="p-sub">${u.city ? ICONS.pin + ' ' + esc(u.city) + ' · ' : ''}${u.online ? '<span style="color:#2ee6a8">çevrimiçi</span>' : fmtAgo(u.lastSeen)}</div>
       </div>
       ${isMe ? '' : `<span class="dm-mini">${CHAT_SM}</span>`}`;
     b.onclick = (e) => {
@@ -794,19 +1033,15 @@
 
   function renderPeople() {
     const list = [...state.users].sort((a, b) => (b.online === a.online ? (b.lastSeen || 0) - (a.lastSeen || 0) : b.online - a.online));
-    const mobile = $('#peopleMobile');
-    const side = $('#peopleSide');
-    mobile.innerHTML = '';
-    side.innerHTML = '';
+    const mobile = $('#peopleMobile'), side = $('#peopleSide');
+    mobile.innerHTML = ''; side.innerHTML = '';
     if (!list.length) {
       mobile.innerHTML = '<div class="empty">Henüz kimse yok.<br>Davet linkini arkadaşına gönder!</div>';
       side.innerHTML = '<div class="empty" style="padding:24px 8px">Kimse yok</div>';
     }
-    list.forEach((u) => {
-      mobile.appendChild(personNode(u));
-      side.appendChild(personNode(u));
-    });
+    list.forEach((u) => { mobile.appendChild(personNode(u)); side.appendChild(personNode(u)); });
     $('#onlineCount').textContent = state.onlineCount + ' çevrimiçi';
+    $('#onlineNum').textContent = state.onlineCount;
   }
 
   function updateHeader() {
@@ -818,28 +1053,24 @@
       if (state.activeDm) {
         const c = state.convos.get(state.activeDm);
         const p = c ? c.peer : findUser(state.activeDm);
-        t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg> Özel Mesaj';
+        t.innerHTML = ICONS.chat + ' Özel Mesaj';
         s.textContent = p ? p.name + (p.online ? ' · çevrimiçi' : '') : '';
         $('#backBtn').classList.remove('hidden');
         return;
       }
-      t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg> Mesajlar';
+      t.innerHTML = ICONS.chat + ' Mesajlar';
       s.textContent = state.convos.size + ' sohbet';
     } else if (state.tab === 'people') {
-      t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16.5 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.3" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg> Kişiler';
+      t.innerHTML = ICONS.users + ' Kişiler';
       s.textContent = state.onlineCount + ' kişi çevrimiçi';
     } else {
-      t.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21v-1a7.5 7.5 0 0 1 15 0v1"/></svg> Profilim';
+      t.innerHTML = ICONS.user + ' Profilim';
       s.textContent = state.me ? '@' + state.me.name : '';
     }
     if (!state.activeDm || state.tab !== 'messages') $('#backBtn').classList.add('hidden');
   }
 
-  function findUser(id) {
-    return state.users.find((u) => u.id === id) || null;
-  }
-
-  /* ---------------- sekmeler ---------------- */
+  /* ================= sekmeler ================= */
   function setTab(tab) {
     if (tab === 'me') { openProfile(state.me && state.me.id); return; }
     state.tab = tab;
@@ -848,17 +1079,12 @@
     });
     document.querySelectorAll('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.bn-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-    if (tab === 'messages') {
-      $('#composerGlobal').classList.add('hidden');
-      syncDmView();
-    }
+    if (tab === 'messages') syncDmView();
     updateHeader();
   }
-  document.querySelectorAll('.nav-item, .bn-item').forEach((b) => {
-    if (b.dataset.tab) b.onclick = () => setTab(b.dataset.tab);
-  });
+  document.querySelectorAll('.nav-item, .bn-item').forEach((b) => { if (b.dataset.tab) b.onclick = () => setTab(b.dataset.tab); });
 
-  /* ---------------- DM ---------------- */
+  /* ================= DM ================= */
   function ensureConvo(peerId) {
     if (!state.convos.has(peerId)) {
       state.convos.set(peerId, {
@@ -878,12 +1104,8 @@
     ensureConvo(peerId).unread = 0;
     state.typingDm.clear();
     if (socket) socket.emit('dm:open', { peerId });
-    closeSheet();
-    setTab('messages');
-    syncDmView();
-    renderDmList();
-    renderThread();
-    $('#inDm').placeholder = 'Mesaj yaz…';
+    closeSheet(); setTab('messages'); syncDmView(); renderDmList(); renderThread();
+    clearPending();
     setTimeout(() => { if (window.innerWidth > 760) $('#inDm').focus(); }, 120);
   }
 
@@ -898,63 +1120,35 @@
 
   $('#backBtn').onclick = () => {
     if (state.tab === 'messages' && state.activeDm) {
-      state.activeDm = null;
-      syncDmView();
-      renderDmList();
+      state.activeDm = null; syncDmView(); renderDmList();
     }
   };
 
-  function renderThread() {
+  function renderThread(keepScroll) {
     const feed = $('#dmFeed');
+    const prevScroll = feed.scrollTop;
     feed.innerHTML = '';
     const c = state.convos.get(state.activeDm);
     if (!c) return;
-    if (!c.messages.length) {
-      feed.innerHTML = `<div class="empty"><span class="big">👋</span><b>${esc(c.peer.name)}</b> ile sohbet başlat.<br>Bu mesajları sadece ikiniz görürsünüz.</div>`;
+    if (c.messages.length) {
+      c.messages.forEach((m) => feed.appendChild(messageRow(m, 'dm')));
+      updateReceipts();
     } else {
-      c.messages.forEach((m) => appendDm(m, true));
+      feed.innerHTML = `<div class="empty"><span class="big">👋</span><b>${esc(c.peer.name)}</b> ile sohbet başlat.<br>Bu mesajları sadece ikiniz görürsünüz.</div>`;
     }
-    feed.scrollTop = feed.scrollHeight;
+    if (keepScroll) feed.scrollTop = prevScroll;
+    else feed.scrollTop = feed.scrollHeight;
   }
 
-  function appendDm(m, silent) {
+  function appendDm(m) {
     const feed = $('#dmFeed');
     const emptyEl = feed.querySelector('.empty');
     if (emptyEl) emptyEl.remove();
-    const mine = state.me && m.from === state.me.id;
-    const row = document.createElement('div');
-    row.className = 'msg' + (mine ? ' mine' : '');
-    row.innerHTML = `
-      <button class="ava" style="${avaStyle(m.color)}">${esc(m.emoji)}</button>
-      <div class="bwrap">
-        <div class="meta"><span class="tm">${fmtTime(m.ts)}</span></div>
-        <div class="bubble">${esc(m.text)}</div>
-      </div>`;
-    row.querySelector('.ava').onclick = () => openProfile(m.from);
-    feed.appendChild(row);
-    if (!silent) {
-      const near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 240;
-      if (near) feed.scrollTop = feed.scrollHeight;
-    }
+    feed.appendChild(messageRow(m, 'dm'));
+    const near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 260;
+    if (near) feed.scrollTop = feed.scrollHeight;
+    updateReceipts();
   }
-
-  function sendDm() {
-    const input = $('#inDm');
-    const text = input.value.trim();
-    if (!text || !state.activeDm) return;
-    if (!socket || !socket.connected) { toast('Bağlantı yok, biraz bekle…'); return; }
-    socket.emit('dm:send', { to: state.activeDm, text });
-    input.value = '';
-    input.focus();
-  }
-  $('#sendDm').onclick = sendDm;
-  $('#inDm').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendDm(); });
-  $('#inDm').addEventListener('input', () => {
-    const now = Date.now();
-    if (now - lastType < 1200) return;
-    lastType = now;
-    if (socket && state.activeDm) socket.emit('typing', { to: state.activeDm });
-  });
 
   function renderDmList() {
     const wrap = $('#dmList');
@@ -964,8 +1158,7 @@
     let unreadTotal = 0;
     items.forEach((i) => (unreadTotal += i.unread || 0));
 
-    const badge = $('#badgeSide');
-    const dot = $('#badgeDot');
+    const badge = $('#badgeSide'), dot = $('#badgeDot');
     badge.textContent = unreadTotal;
     badge.classList.toggle('hidden', unreadTotal === 0);
     dot.classList.toggle('hidden', unreadTotal === 0);
@@ -978,7 +1171,8 @@
     }
     items.forEach((c) => {
       const last = c.last;
-      const lastText = last ? (last.from === (state.me && state.me.id) ? 'Sen: ' + last.text : last.text) : 'Sohbeti başlat…';
+      const mineLast = last && state.me && last.from === state.me.id;
+      const lastText = last ? (last.deleted ? 'mesaj silindi' : (mineLast ? 'Sen: ' : '') + previewText(last)) : 'Sohbeti başlat…';
       const btn = document.createElement('button');
       btn.className = 'convo';
       btn.innerHTML = `
@@ -997,24 +1191,21 @@
     });
   }
 
-  /* ---------------- yazıyor göstergesi ---------------- */
+  /* ================= yazıyor ================= */
   function renderTyping() {
     const now = Date.now();
-    // genel
     for (const [k, v] of state.typingGlobal) if (now - v.ts > 3000) state.typingGlobal.delete(k);
     const g = [...state.typingGlobal.values()];
     $('#typingGlobal').innerHTML = g.length
       ? `<span class="dots"><i></i><i></i><i></i></span> ${esc(g.map((x) => x.name).slice(0, 3).join(', '))} yazıyor…`
       : '';
-    // dm
     for (const [k, v] of state.typingDm) if (now - v.ts > 3000) state.typingDm.delete(k);
     const d = [...state.typingDm.values()];
     $('#typingDm').innerHTML = d.length && state.activeDm ? `<span class="dots"><i></i><i></i><i></i></span> yazıyor…` : '';
   }
   setInterval(renderTyping, 900);
-  setInterval(() => { if (state.tab === 'people' || state.tab === 'messages') renderPeople(); }, 30000);
 
-  /* ---------------- profil sheet ---------------- */
+  /* ================= profil sheet ================= */
   let sheetUserId = null;
   function openProfile(userId) {
     if (!userId) return;
@@ -1024,7 +1215,7 @@
     $('#sheetAva').textContent = u.emoji || '👤';
     $('#sheetAva').style.cssText = 'width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:38px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.16);' + avaStyle(u.color || '#666');
     $('#sheetName').textContent = u.name + (isMe ? ' (sen)' : '');
-    $('#sheetCity').innerHTML = u.city ? PIN + ' ' + esc(u.city) : '<span style="opacity:.6">Şehir belirtilmedi</span>';
+    $('#sheetCity').innerHTML = u.city ? ICONS.pin + ' ' + esc(u.city) : '<span style="opacity:.6">Şehir belirtilmedi</span>';
     $('#statOnline').textContent = u.online ? 'Çevrimiçi' : 'Gitti';
     $('#statOnline').style.color = u.online ? '#2ee6a8' : '#8b8b9e';
     $('#statMsgs').textContent = state.msgCounts.get(userId) || 0;
@@ -1032,45 +1223,51 @@
     const msgBtn = $('#sheetMsg');
     if (isMe) {
       msgBtn.innerHTML = PENCIL + ' Adımı değiştir';
-      msgBtn.onclick = () => {
-        closeSheet();
-        const nn = prompt('Yeni kullanıcı adın:', u.name);
-        if (nn && nn.trim().length >= 2 && socket) {
-          const profile = { name: nn.trim().slice(0, 24), city: u.city || '', emoji: u.emoji, color: u.color };
-          store.set('st_profile', profile);
-          socket.emit('hello', { userId: getUserId(), ...profile });
-          toast('İsmin güncellendi');
-        }
-      };
+      msgBtn.onclick = () => { closeSheet(); renameMe(); };
+      $('#sheetExtra').classList.remove('hidden');
     } else {
       msgBtn.innerHTML = CHAT_SM + ' Mesaj gönder';
       msgBtn.onclick = () => openDm(userId);
+      $('#sheetExtra').classList.add('hidden');
     }
     $('#backdrop').classList.remove('hidden');
   }
   function closeSheet() { $('#backdrop').classList.add('hidden'); }
   $('#sheetClose').onclick = closeSheet;
   $('#backdrop').addEventListener('click', (e) => { if (e.target.id === 'backdrop') closeSheet(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSheet(); const lb = document.querySelector('.lightbox'); if (lb) lb.remove(); } });
 
-  /* ---------------- davet ---------------- */
-  $('#inviteBtn').onclick = async () => {
-    const url = location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast('🔗 Link kopyalandı, arkadaşına gönder!');
-    } catch (e) {
-      prompt('Bu linki arkadaşına gönder:', url);
-    }
+  function renameMe() {
+    const u = state.me;
+    if (!u) return;
+    const nn = prompt('Yeni kullanıcı adın:', u.name);
+    if (!nn || nn.trim().length < 2) return;
+    const profile = { name: nn.trim().slice(0, 24), city: u.city || '', emoji: u.emoji, color: u.color };
+    store.set('st_profile', profile);
+    if (socket) socket.emit('hello', { userId: getUserId(), ...profile });
+    toast('İsmin güncellendi');
+  }
+
+  $('#btnRename').onclick = () => {
+    // kendi profil kartındayız
+    closeSheet(); renameMe();
+  };
+  $('#btnLogout').onclick = () => {
+    if (!confirm('Çıkış yapılsın mı? (profilin silinir, tekrar isim sorulur)')) return;
+    store.del('st_profile'); store.del('st_uid'); store.del('st_emoji'); store.del('st_color');
+    location.reload();
   };
 
-  /* ---------------- başlat ---------------- */
+  /* ================= davet ================= */
+  $('#inviteBtn').onclick = async () => {
+    const url = location.href;
+    try { await navigator.clipboard.writeText(url); toast('🔗 Link kopyalandı, arkadaşına gönder!'); }
+    catch (e) { prompt('Bu linki arkadaşına gönder:', url); }
+  };
+
+  /* ================= başlat ================= */
   window.addEventListener('popstate', () => {
-    if (state.tab === 'messages' && state.activeDm) {
-      state.activeDm = null;
-      syncDmView();
-      renderDmList();
-    }
+    if (state.tab === 'messages' && state.activeDm) { state.activeDm = null; syncDmView(); renderDmList(); }
   });
   window.addEventListener('resize', () => {
     if (window.innerWidth > 760 && state.tab === 'people') setTab('feed');
