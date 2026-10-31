@@ -173,6 +173,16 @@
   .rec-dot{width:10px;height:10px;border-radius:50%;background:var(--pink);animation:blink 1s infinite}
   .rec-time{font-variant-numeric:tabular-nums;font-weight:800;font-size:14px;color:#ff8fa3}
   .rec-hint{font-size:12px;color:var(--muted);margin-left:auto}
+  .rec-btn{border:0;border-radius:999px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:800;
+    cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s,transform .1s,filter .15s}
+  .rec-btn:active{transform:scale(.95)}
+  .rec-btn.cancel{background:rgba(255,255,255,.08);color:#cfcfe0;border:1px solid rgba(255,255,255,.16)}
+  .rec-btn.cancel:hover{background:rgba(255,255,255,.16);color:#fff}
+  .rec-btn.go{background:linear-gradient(135deg,var(--pink),#ff6a88);color:#fff;box-shadow:0 4px 14px rgba(254,44,85,.38)}
+  .rec-btn.go:hover{filter:brightness(1.1)}
+  @media (max-width:560px){ .rec-hint{display:none} .rec-bar{gap:7px} .rec-btn{padding:7px 10px;font-size:12px} }
+  .composer.recording .cbtn, .composer.recording .send{display:none}
+  .composer.recording .rec-bar{gap:9px}
 
   /* ---------- LISTS ---------- */
   .panel-head{padding:14px 16px 6px;font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
@@ -366,7 +376,8 @@
             <span class="rec-dot"></span>
             <span class="rec-time" id="recTime">0:00</span>
             <span class="rec-hint">kaydediliyor…</span>
-            <button class="cbtn" id="recStop" style="width:34px;height:34px">■</button>
+            <button class="rec-btn cancel" id="recCancel" type="button" title="Vazgeç (Esc)">✕ İptal</button>
+            <button class="rec-btn go" id="recStop" type="button" title="Gönder">■ Gönder</button>
           </div>
           <button class="send" id="sendGlobal"><span id="icoSend"></span></button>
         </div>
@@ -392,6 +403,13 @@
             <button class="cbtn" id="btnPhotoDm" title="Fotoğraf gönder"><span id="icoCam2"></span></button>
             <button class="cbtn" id="btnMicDm" title="Ses kaydı"><span id="icoMic2"></span></button>
             <input type="text" id="inDm" maxlength="500" placeholder="Özel mesaj yaz…" autocomplete="off" />
+            <div class="rec-bar hidden" id="recBarDm">
+              <span class="rec-dot"></span>
+              <span class="rec-time" id="recTimeDm">0:00</span>
+              <span class="rec-hint">kaydediliyor…</span>
+              <button class="rec-btn cancel" id="recCancelDm" type="button" title="Vazgeç (Esc)">✕ İptal</button>
+              <button class="rec-btn go" id="recStopDm" type="button" title="Gönder">■ Gönder</button>
+            </div>
             <button class="send" id="sendDm"><span id="icoSend2"></span></button>
           </div>
         </div>
@@ -644,7 +662,10 @@
     });
 
     socket.on('dm:list', (list) => {
-      (list || []).forEach((item) => {
+      const arr = Array.isArray(list) ? list : [];
+      const seen = new Set();
+      arr.forEach((item) => {
+        seen.add(item.peerId);
         const existing = state.convos.get(item.peerId);
         state.convos.set(item.peerId, {
           peer: item.peer,
@@ -655,6 +676,8 @@
         });
         if (item.peerRead) state.peerRead.set(item.peerId, item.peerRead);
       });
+      // sunucuda artık olmayan (mesajları silinmiş) sohbetleri listeden düşür
+      for (const key of Array.from(state.convos.keys())) if (!seen.has(key)) state.convos.delete(key);
       renderDmList();
     });
 
@@ -697,11 +720,24 @@
       renderDmList();
     });
 
-    // silinen mesaj
+    // silinen mesaj → akıştan tamamen kaldır (yumuşak kaybolma)
     socket.on('msg:deleted', ({ id }) => {
       ['#feed', '#dmFeed'].forEach((sel) => {
         const el = document.querySelector(`${sel} [data-id="${id}"]`);
-        if (el) markDeleted(el);
+        if (!el) return;
+        el.style.transition = 'opacity .18s ease, transform .18s ease, max-height .2s ease, padding .2s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'scale(.96)';
+        el.style.maxHeight = el.offsetHeight + 'px';
+        el.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+          el.style.maxHeight = '0px';
+          el.style.paddingTop = '0px';
+          el.style.paddingBottom = '0px';
+          el.style.marginTop = '0px';
+          el.style.marginBottom = '0px';
+        });
+        setTimeout(() => el.remove(), 260);
       });
     });
 
@@ -918,45 +954,74 @@
   $('#mediaCancelDm').onclick = clearPending;
 
   /* ================= ses kaydı ================= */
-  let rec = { media: null, chunks: [], stream: null, timer: null, start: 0, cancel: false };
+  let rec = { media: null, chunks: [], stream: null, timer: null, start: 0, cancel: false, scope: 'global' };
+  const REC_UI = {
+    global: { bar: '#recBar', time: '#recTime', input: '#inGlobal', mic: '#btnMic' },
+    dm: { bar: '#recBarDm', time: '#recTimeDm', input: '#inDm', mic: '#btnMicDm' },
+  };
+
+  function recReset() {
+    document.querySelectorAll('.rec-bar').forEach((b) => b.classList.add('hidden'));
+    ['#inGlobal', '#inDm'].forEach((sel) => { const el = document.querySelector(sel); if (el) el.classList.remove('hidden'); });
+    document.querySelectorAll('#btnMic, #btnMicDm').forEach((b) => b.classList.remove('rec'));
+    document.querySelectorAll('.composer.recording').forEach((c) => c.classList.remove('recording'));
+    const anyMic = document.querySelector('#btnMic, #btnMicDm');
+    if (anyMic) {
+      const ui = REC_UI[rec.scope] || REC_UI.global;
+      const tt = document.querySelector(ui.mic);
+      if (tt) tt.title = 'Ses kaydı';
+    }
+  }
 
   async function startRecording(scope) {
     if (!navigator.mediaDevices || !window.MediaRecorder) { toast('Tarayıcın ses kaydını desteklemiyor 😕'); return; }
+    if (rec.media && rec.media.state === 'recording') return;
+    const ui = REC_UI[scope] || REC_UI.global;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm'
         : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
-      rec = { media: new MediaRecorder(stream, mime ? { mimeType: mime } : undefined), chunks: [], stream, timer: null, start: Date.now(), cancel: false };
+      rec = {
+        media: new MediaRecorder(stream, mime ? { mimeType: mime } : undefined),
+        chunks: [], stream, timer: null, start: Date.now(), cancel: false, scope,
+      };
       rec.media.ondataavailable = (e) => { if (e.data.size) rec.chunks.push(e.data); };
       rec.media.onstop = () => {
         const secs = (Date.now() - rec.start) / 1000;
         const cancelled = rec.cancel;
-        rec.stream.getTracks().forEach((t) => t.stop());
+        const scopeNow = rec.scope;
+        const chunks = rec.chunks.slice();
+        const mimeNow = rec.media.mimeType || 'audio/webm';
+        try { rec.stream.getTracks().forEach((t) => t.stop()); } catch (e) {}
         clearInterval(rec.timer);
-        $('#recBar').classList.add('hidden');
-        ['#inGlobal', '#inDm'].forEach((s) => { const el = document.querySelector(s); if (el) el.classList.remove('hidden'); });
-        document.querySelectorAll('#btnMic, #btnMicDm').forEach((b) => b.classList.remove('rec'));
-        if (cancelled) return;
-        if (secs < 0.7) { toast('Kayıt çok kısa 🎤'); return; }
-        const blob = new Blob(rec.chunks, { type: rec.media.mimeType || 'audio/webm' });
+        recReset();
+        rec.media = null;
+        if (cancelled) { toast('Kayıt iptal edildi ✕'); return; }
+        if (secs < 0.7) { toast('Kayıt çok kısa — en az 1 saniye 🎤'); return; }
+        const blob = new Blob(chunks, { type: mimeNow });
         if (blob.size > 2.4 * 1024 * 1024) { toast('Ses kaydı çok uzun (max ~1 dk)'); return; }
         const fr = new FileReader();
         fr.onload = () => {
           if (!socket || !socket.connected) { toast('Bağlantı yok'); return; }
-          if (scope === 'dm') { if (state.activeDm) socket.emit('dm:send', { to: state.activeDm, audio: fr.result }); }
+          if (scopeNow === 'dm') { if (state.activeDm) socket.emit('dm:send', { to: state.activeDm, audio: fr.result }); }
           else socket.emit('global:send', { audio: fr.result });
+          toast('Ses gönderildi 🎤');
         };
         fr.readAsDataURL(blob);
       };
       rec.media.start();
-      $('#recBar').classList.remove('hidden');
-      ['#inGlobal', '#inDm'].forEach((s) => { const el = document.querySelector(s); if (el) el.classList.add('hidden'); });
-      document.querySelectorAll('#btnMic, #btnMicDm').forEach((b) => b.classList.add('rec'));
+      $(ui.bar).classList.remove('hidden');
+      $(ui.input).classList.add('hidden');
+      const comp = $(ui.bar).closest('.composer');
+      if (comp) comp.classList.add('recording');
+      document.querySelector(ui.mic).classList.add('rec');
+      document.querySelector(ui.mic).title = 'Kaydı bitir ve gönder';
       const t0 = Date.now();
       rec.timer = setInterval(() => {
         const d = Math.floor((Date.now() - t0) / 1000);
-        $('#recTime').textContent = Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
-        if (d >= 60) stopRecording(false); // max 1 dk
+        const el = $(ui.time);
+        if (el) el.textContent = Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
+        if (d >= 60) stopRecording(false);
       }, 200);
     } catch (e) {
       toast('Mikrofon izni verilmedi 🎤');
@@ -964,7 +1029,7 @@
   }
 
   function stopRecording(cancel) {
-    if (!rec.media || rec.media.state === 'inactive') return;
+    if (!rec.media || rec.media.state === 'inactive') { if (cancel) { recReset(); toast('Kayıt iptal edildi ✕'); } return; }
     rec.cancel = !!cancel;
     try { rec.media.stop(); } catch (e) {}
   }
@@ -978,6 +1043,12 @@
     else startRecording('dm');
   };
   $('#recStop').onclick = () => stopRecording(false);
+  $('#recStopDm').onclick = () => stopRecording(false);
+  $('#recCancel').onclick = () => stopRecording(true);
+  $('#recCancelDm').onclick = () => stopRecording(true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && rec.media && rec.media.state === 'recording') { stopRecording(true); }
+  });
 
   /* ================= silme ================= */
   function askDelete(id, scope) {

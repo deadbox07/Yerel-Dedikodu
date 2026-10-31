@@ -46,10 +46,17 @@ let dbRetryTimer = null;
 
 function normalize(raw) {
   const p = raw && typeof raw === 'object' ? raw : {};
+  const dms = p.dms && typeof p.dms === 'object' ? p.dms : {};
+  // silinmiş mesajlar artık hiç tutulmuyor: eski kayıtlardan da temizle
+  if (dms) {
+    for (const t of Object.values(dms)) {
+      if (t && Array.isArray(t.messages)) t.messages = t.messages.filter((m) => m && !m.deleted);
+    }
+  }
   return {
     users: p.users && typeof p.users === 'object' ? p.users : {},
-    global: Array.isArray(p.global) ? p.global.slice(-MAX_GLOBAL) : [],
-    dms: p.dms && typeof p.dms === 'object' ? p.dms : {},
+    global: Array.isArray(p.global) ? p.global.filter((m) => m && !m.deleted).slice(-MAX_GLOBAL) : [],
+    dms,
     reads: p.reads && typeof p.reads === 'object' ? p.reads : {},
   };
 }
@@ -422,29 +429,28 @@ io.on('connection', (socket) => {
     const scope = payload && payload.scope === 'dm' ? 'dm' : 'global';
     if (!me || !id) return;
 
-    const wipe = (m) => {
-      m.deleted = true;
-      m.text = '';
-      delete m.image;
-      delete m.audio;
-    };
-
     if (scope === 'global') {
-      const m = db.global.find((x) => x.id === id);
-      if (!m || m.from !== me) return;
-      wipe(m);
+      const i = db.global.findIndex((x) => x.id === id);
+      if (i === -1 || db.global[i].from !== me) return;
+      db.global.splice(i, 1);                       // mesaj tamamen yok oldu
       io.emit('msg:deleted', { scope: 'global', id });
       scheduleSave();
       return;
     }
-    for (const thread of Object.values(db.dms)) {
-      const m = thread.messages.find((x) => x.id === id);
-      if (m && m.from === me) {
-        wipe(m);
-        io.to('u:' + thread.uids[0]).to('u:' + thread.uids[1]).emit('msg:deleted', { scope: 'dm', id });
-        scheduleSave();
-        return;
+
+    for (const [key, thread] of Object.entries(db.dms)) {
+      const i = thread.messages.findIndex((x) => x.id === id);
+      if (i === -1) continue;
+      if (thread.messages[i].from !== me) return;
+      thread.messages.splice(i, 1);                 // mesaj tamamen yok oldu
+      if (!thread.messages.length) { delete db.dms[key]; } // boş sohbet de silinsin
+      io.to('u:' + thread.uids[0]).to('u:' + thread.uids[1]).emit('msg:deleted', { scope: 'dm', id });
+      // sohbet listesindeki son mesaj önizlemesi tazelensin
+      for (const uidTo of thread.uids) {
+        io.to('u:' + uidTo).emit('dm:list', dmListFor(uidTo));
       }
+      scheduleSave();
+      return;
     }
   });
 
