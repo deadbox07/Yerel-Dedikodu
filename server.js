@@ -65,6 +65,7 @@ function normalize(raw) {
 function loadFile() {
   try {
     db = normalize(JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')));
+    healAdmins();
     console.log('💾 Veri data.json dosyasından yüklendi');
   } catch (e) {}
 }
@@ -99,6 +100,7 @@ async function initStorage() {
       )`);
     const r = await pool.query("SELECT value FROM yd_state WHERE key = 'db'");
     if (r.rows[0]) db = normalize(r.rows[0].value);
+  healAdmins();
     storageMode = 'postgres';
     dbError = null;
     console.log('✅ PostgreSQL bağlı — sohbet + medya KALICI');
@@ -226,6 +228,7 @@ const colorOk = (c) => (/^#[0-9a-fA-F]{6}$/.test(String(c || '')) ? String(c) : 
 
 /* ---------------- şifreli hesaplar ---------------- */
 const ADMIN_NAME = (process.env.ADMIN_NAME || 'deadbox1903').trim().toLowerCase();
+const ADMIN_CODE = String(process.env.ADMIN_CODE || 'deadbox1903').trim().toLowerCase();
 const nameKey = (n) => String(n || '').trim().toLowerCase();
 const hashPass = (pass, salt) => crypto.scryptSync(String(pass), salt, 32).toString('hex');
 const newSalt = () => crypto.randomBytes(12).toString('hex');
@@ -254,8 +257,24 @@ function pub(u) {
   };
 }
 
+function healAdmins() {
+  for (const u of Object.values(db.users)) {
+    if (isAdminName(u.name)) u.isAdmin = true;
+  }
+}
+
 function presencePayload() {
-  const list = Object.values(db.users).map(pub);
+  // aynı isim birden fazla kayıtta varsa tek göster (çevrimiçi olan kazanır)
+  const byName = new Map();
+  for (const u of Object.values(db.users)) {
+    const p = pub(u);
+    const key = nameKey(p.name);
+    const cur = byName.get(key);
+    if (!cur || (p.online && !cur.online) || (p.online === cur.online && (p.lastSeen || 0) > (cur.lastSeen || 0))) {
+      byName.set(key, p);
+    }
+  }
+  const list = [...byName.values()];
   list.sort((a, b) => (b.online === a.online ? b.lastSeen - a.lastSeen : b.online - a.online));
   return { users: list.slice(0, 400), online: list.filter((u) => u.online).length, total: list.length };
 }
@@ -373,6 +392,7 @@ io.on('connection', (socket) => {
     socket.join(socket.data.room);
     online.set(user.id, (online.get(user.id) || 0) + 1);
     user.lastSeen = Date.now();
+    if (isAdminName(user.name)) user.isAdmin = true;   // isim yönetici ise bayrak düzeltilir
     if (!Array.isArray(user.tokens)) user.tokens = [];
 
     socket.emit('auth:ok', { user: pub(user), token: socket.data.token || null });
@@ -506,6 +526,21 @@ io.on('connection', (socket) => {
     broadcastPresence();
     for (const uidTo of Object.keys(db.users)) io.to('u:' + uidTo).emit('dm:list', dmListFor(uidTo));
     systemMessage(`⛔ ${target.name} yönetici tarafından sohbetten çıkarıldı.`);
+    scheduleSave();
+  });
+
+  // kod ile yönetici olma (isim tutmasa bile)
+  socket.on('admin:claim', (payload) => {
+    const me = socket.data.userId;
+    const u = me && db.users[me];
+    if (!u) return;
+    const code = String((payload && payload.code) || '').trim().toLowerCase();
+    if (!code || code !== ADMIN_CODE) return socket.emit('err', { message: 'Yönetici kodu yanlış.' });
+    u.isAdmin = true;
+    socket.emit('me', { user: pub(u) });
+    socket.emit('auth:ok', { user: pub(u), token: socket.data.token || null });
+    socket.emit('toast:msg', { message: '👑 Artık yöneticisin!' });
+    broadcastPresence();
     scheduleSave();
   });
 
@@ -711,6 +746,17 @@ function maskUrl(url) {
     return { parseError: e.message, startsWith: String(url).slice(0, 13), length: String(url).length };
   }
 }
+
+app.get('/api/durum', (_req, res) => {
+  healAdmins();
+  const users = Object.values(db.users).map((u) => ({
+    name: u.name, isAdmin: !!u.isAdmin, online: (online.get(u.id) || 0) > 0, lastSeen: u.lastSeen || 0,
+  }));
+  users.sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
+  const groups = Object.entries(db.dms).filter(([, t]) => t.isGroup)
+    .map(([key, t]) => ({ key, name: t.name, members: t.uids.map((id) => (db.users[id] ? db.users[id].name : 'ayrıldı')), messages: t.messages.length }));
+  res.json({ users, groups, adminName: ADMIN_NAME, counts: { users: users.length, groups: groups.length } });
+});
 
 app.get('/health', (_req, res) =>
   res.json({

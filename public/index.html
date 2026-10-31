@@ -392,6 +392,7 @@
       </div>
       <div class="top-right">
         <span class="online-pill" id="onlinePill"><i></i><b id="onlineNum">0</b>&nbsp;çevrimiçi</span>
+        <span class="persist hidden" id="adminTop" title="Yönetici" style="color:#ffd60a"></span>
         <span class="persist" id="persistBadge" data-on="0" title="Kontrol ediliyor…">💾</span>
         <button class="mini-ava" id="myAva">😎</button>
       </div>
@@ -497,6 +498,7 @@
     </div>
     <div class="sheet-extra hidden" id="sheetExtra">
       <button id="btnRename">✏️ Adımı değiştir</button>
+      <button id="btnBecomeAdmin">👑 Yönetici ol</button>
       <button id="btnLogout">🚪 Çıkış yap</button>
     </div>
   </div>
@@ -561,6 +563,7 @@
     pin: '<svg class="pin-ico" viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
   };
   const BAN = '<svg viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6 18.4 18.4"/></svg>';
+  const CROWN = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-2px"><path d="M3 8.5 7.5 12 12 5l4.5 7L21 8.5 19 19H5L3 8.5Z"/><path d="M5 19h14"/></svg>';
   const PENCIL = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;display:inline-block"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   const CHAT_SM = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;display:inline-block"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
 
@@ -745,6 +748,8 @@
       showAuthScreen();
     });
 
+    socket.on('toast:msg', ({ message }) => toast(message));
+
     socket.on('kicked', ({ by }) => {
       store.del('st_auth'); store.del('st_profile'); store.del('st_uid');
       alert('⛔ Yönetici (' + (by || 'yönetici') + ') tarafından sohbetten çıkarıldın.');
@@ -786,6 +791,12 @@
       a.textContent = user.emoji;
       a.style.cssText = avaStyle(user.color) + ';width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:1.5px solid rgba(255,255,255,.15)';
       a.onclick = () => openProfile(user.id);
+      const adm = $('#adminTop');
+      if (adm) {
+        adm.classList.toggle('hidden', !user.isAdmin);
+        adm.innerHTML = user.isAdmin ? CROWN : '';
+        adm.title = user.isAdmin ? 'Yönetici: ' + user.name : '';
+      }
       if (!joined) { joined = true; $('#topSub').textContent = 'Bağlandı · ' + user.name; }
     });
 
@@ -843,6 +854,7 @@
       if (peerRead) state.peerRead.set(peerId, peerRead);
       if (state.activeDm === peerId) { renderThread(); markRead(peerId); }
       renderDmList();
+      if (isGroup) renderPeople();
     });
 
     socket.on('dm:new', (m) => {
@@ -1255,7 +1267,7 @@
     b.innerHTML = `
       <div class="ava" style="${avaStyle(u.color)}">${esc(u.emoji)}${u.online ? '<span class="online-dot"></span>' : ''}</div>
       <div class="p-body">
-        <div class="p-name">${esc(u.name)}${u.isAdmin ? ' <span class="crown" title="Yönetici">👑</span>' : ''}${isMe ? ' <span style="color:#8b8b9e;font-weight:600">(sen)</span>' : ''}</div>
+        <div class="p-name">${u.isAdmin ? '<span class="crown" title="Yönetici">' + CROWN + '</span> ' : ''}${esc(u.name)}${isMe ? ' <span style="color:#8b8b9e;font-weight:600">(sen)</span>' : ''}</div>
         <div class="p-sub">${u.city ? ICONS.pin + ' ' + esc(u.city) + ' · ' : ''}${u.online ? '<span style="color:#2ee6a8">çevrimiçi</span>' : fmtAgo(u.lastSeen)}</div>
       </div>
       ${isMe ? '' : `<span class="dm-mini">${CHAT_SM}</span>`}
@@ -1269,17 +1281,51 @@
     return b;
   }
 
+  function dedupeByName(arr) {
+    const seen = new Map();
+    (arr || []).forEach((u) => {
+      if (!u) return;
+      const k = String(u.name || '').trim().toLowerCase();
+      const cur = seen.get(k);
+      if (!cur || (u.online && !cur.online)) seen.set(k, u);
+    });
+    return [...seen.values()];
+  }
+
   function renderPeople() {
-    const list = [...state.users].sort((a, b) => (b.online === a.online ? (b.lastSeen || 0) - (a.lastSeen || 0) : b.online - a.online));
-    const mobile = $('#peopleMobile'), side = $('#peopleSide');
-    mobile.innerHTML = ''; side.innerHTML = '';
-    if (!list.length) {
-      mobile.innerHTML = '<div class="empty">Henüz kimse yok.<br>Davet linkini arkadaşına gönder!</div>';
-      side.innerHTML = '<div class="empty" style="padding:24px 8px">Kimse yok</div>';
+    const side = $('#peopleSide'), mobile = $('#peopleMobile');
+    const titleEl = document.querySelector('.rightbar h3');
+    const c = state.activeDm ? state.convos.get(state.activeDm) : null;
+    const groupMembers = (c && c.isGroup && c.group && Array.isArray(c.group.members)) ? c.group.members : null;
+
+    // sol/kişiler sekmesi: her zaman herkes (isim tekrarı yok)
+    const allList = dedupeByName([...state.users]).sort((a, b) =>
+      (a.online === b.online ? (b.lastSeen || 0) - (a.lastSeen || 0) : (b.online ? 1 : 0) - (a.online ? 1 : 0)));
+
+    // sağ panel: grup açıksa sadece o grubun üyeleri (herkes tek satır)
+    const sideList = groupMembers
+      ? dedupeByName(groupMembers).sort((a, b) => (a.online === b.online ? (b.lastSeen || 0) - (a.lastSeen || 0) : (b.online ? 1 : 0) - (a.online ? 1 : 0)))
+      : allList;
+
+    if (titleEl) {
+      titleEl.innerHTML = groupMembers
+        ? '👥 Grup üyeleri <span id="onlineCount">' + sideList.filter((u) => u.online).length + ' çevrimiçi</span>'
+        : '👥 Aktif kişiler <span id="onlineCount">' + state.onlineCount + ' çevrimiçi</span>';
     }
-    list.forEach((u) => { mobile.appendChild(personNode(u)); side.appendChild(personNode(u)); });
-    $('#onlineCount').textContent = state.onlineCount + ' çevrimiçi';
-    $('#onlineNum').textContent = state.onlineCount;
+
+    if (mobile) mobile.innerHTML = '';
+    if (side) side.innerHTML = '';
+    if (!allList.length) {
+      if (mobile) mobile.innerHTML = '<div class="empty">Henüz kimse yok.<br>Davet linkini arkadaşına gönder!</div>';
+      if (side) side.innerHTML = '<div class="empty" style="padding:24px 8px">Kimse yok</div>';
+    } else {
+      allList.forEach((u) => mobile && mobile.appendChild(personNode(u)));
+      sideList.forEach((u) => side && side.appendChild(personNode(u)));
+    }
+    const oc = $('#onlineCount');
+    if (oc) oc.textContent = (groupMembers ? sideList.filter((u) => u.online).length : state.onlineCount) + ' çevrimiçi';
+    const on = $('#onlineNum');
+    if (on) on.textContent = state.onlineCount;
   }
 
   function updateHeader() {
@@ -1324,6 +1370,7 @@
     document.querySelectorAll('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.bn-item').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
     if (tab === 'messages') syncDmView();
+    if (tab !== 'messages') { state.activeDm = null; renderPeople(); }
     updateHeader();
   }
   document.querySelectorAll('.nav-item, .bn-item').forEach((b) => { if (b.dataset.tab) b.onclick = () => setTab(b.dataset.tab); });
@@ -1345,6 +1392,7 @@
   function openDm(peerId) {
     if (!peerId || (state.me && peerId === state.me.id)) return;
     state.activeDm = peerId;
+    renderPeople();
     ensureConvo(peerId).unread = 0;
     state.typingDm.clear();
     if (socket) socket.emit('dm:open', { peerId });
@@ -1364,7 +1412,7 @@
 
   $('#backBtn').onclick = () => {
     if (state.tab === 'messages' && state.activeDm) {
-      state.activeDm = null; syncDmView(); renderDmList();
+      state.activeDm = null; syncDmView(); renderDmList(); renderPeople();
     }
   };
 
@@ -1460,7 +1508,7 @@
     const isMe = state.me && userId === state.me.id;
     $('#sheetAva').textContent = u.emoji || '👤';
     $('#sheetAva').style.cssText = 'width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:38px;margin:0 auto 12px;border:2px solid rgba(255,255,255,.16);' + avaStyle(u.color || '#666');
-    $('#sheetName').innerHTML = esc(u.name) + (u.isAdmin ? ' <span class="badge-admin">👑 YÖNETİCİ</span>' : '') + (isMe ? ' <span style="color:#8b8b9e;font-size:13px">(sen)</span>' : '');
+    $('#sheetName').innerHTML = esc(u.name) + (u.isAdmin ? ' <span class="badge-admin">' + CROWN + ' YÖNETİCİ</span>' : '') + (isMe ? ' <span style="color:#8b8b9e;font-size:13px">(sen)</span>' : '');
     $('#sheetCity').innerHTML = u.city ? ICONS.pin + ' ' + esc(u.city) : '<span style="opacity:.6">Şehir belirtilmedi</span>';
     $('#statOnline').textContent = u.online ? 'Çevrimiçi' : 'Gitti';
     $('#statOnline').style.color = u.online ? '#2ee6a8' : '#8b8b9e';
@@ -1495,6 +1543,14 @@
     if (pass == null) return;
     socket.emit('auth:rename', { name, password: pass });
   }
+
+  $('#btnBecomeAdmin').onclick = () => {
+    if (state.me && state.me.isAdmin) { toast('Zaten yöneticisin 👑'); return; }
+    const code = prompt('Yönetici kodunu yaz:\n(Deadbox1903 hesabı isen zaten yöneticisin)');
+    if (code == null) return;
+    if (!code.trim()) return;
+    if (socket) socket.emit('admin:claim', { code: code.trim() });
+  };
 
   $('#btnRename').onclick = () => {
     // kendi profil kartındayız
