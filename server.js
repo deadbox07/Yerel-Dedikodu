@@ -24,10 +24,35 @@ let pool = null;              // varsa PostgreSQL bağlantı havuzu
 let storageMode = 'file';     // 'postgres' | 'file'
 let saveTimer = null;
 let dirty = false;
+let dbError = null;      // son bağlantı hatası (teşhis için)
+let dbRetryTimer = null; // bağlantı kurulamazsa tekrar dene
 
 /* ------------------------------------------------------------------ */
 /*  DEPOLAMA: PostgreSQL varsa kalıcı, yoksa data.json                */
 /* ------------------------------------------------------------------ */
+
+function maskUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const pass = u.password ? '****' : '(yok)';
+    return {
+      user: u.username || '(yok)',
+      password: pass,
+      host: u.hostname,
+      port: u.port || '5432',
+      database: u.pathname.replace(/^\//, '') || '(yok)',
+      sslmode: u.searchParams.get('sslmode') || '(yok)',
+      channel_binding: u.searchParams.get('channel_binding') || '(yok)',
+      startsWith: url.slice(0, 13),
+      length: url.length,
+      hasSpaces: /\s/.test(url),
+      hasQuotes: /["']/.test(url),
+    };
+  } catch (e) {
+    return { parseError: e.message, startsWith: String(url).slice(0, 13), length: String(url).length };
+  }
+}
 
 function normalize(raw) {
   const p = raw && typeof raw === 'object' ? raw : {};
@@ -77,14 +102,23 @@ async function initStorage() {
     const r = await pool.query("SELECT value FROM yd_state WHERE key = 'db'");
     if (r.rows[0]) db = normalize(r.rows[0].value);
     storageMode = 'postgres';
+    dbError = null;
     console.log('✅ PostgreSQL bağlı — sohbet geçmişi KALICI');
+    if (dbRetryTimer) { clearInterval(dbRetryTimer); dbRetryTimer = null; }
   } catch (e) {
-    console.error('❌ Veritabanına bağlanılamadı:', e.message);
+    dbError = e.message || String(e);
+    console.error('❌ Veritabanına bağlanılamadı:', dbError);
     console.error('   → dosya moduna geçildi (geçmiş kalıcı olmayacak)');
     if (pool) { try { await pool.end(); } catch (_) {} }
     pool = null;
     storageMode = 'file';
     loadFile();
+    // her 60 saniyede bir tekrar bağlanmayı dene (düzeltince yeniden başlatmaya gerek kalmaz)
+    if (!dbRetryTimer) {
+      dbRetryTimer = setInterval(() => {
+        if (storageMode !== 'postgres' && process.env.DATABASE_URL) initStorage();
+      }, 60000);
+    }
   }
 }
 
@@ -355,6 +389,108 @@ io.on('connection', (socket) => {
   });
 });
 
+
+/* ------------------------------------------------------------------ */
+/*  /kontrol : insan diliyle teşhis sayfası                           */
+/* ------------------------------------------------------------------ */
+
+function kontrolHtml() {
+  const h = maskUrl(process.env.DATABASE_URL);
+  const ok = storageMode === 'postgres';
+  const hasUrl = !!process.env.DATABASE_URL;
+  const rows = (obj) =>
+    Object.entries(obj || {})
+      .map(([k, v]) => `<tr><td>${k}</td><td><code>${String(v)}</code></td></tr>`)
+      .join('');
+
+  let sorun = '';
+  if (!hasUrl) {
+    sorun = `<b>DATABASE_URL değişkeni sunucuya hiç ulaşmamış.</b><br>
+      Render → <b>yerel-dedikodu</b> → <b>Environment</b> → <code>DATABASE_URL</code> satırına
+      Neon adresini yaz → <b>Save Changes</b> → deploy bitince bu sayfayı yenile.`;
+  } else if (h && h.parseError) {
+    sorun = `<b>Adres bozuk görünüyor.</b> Başında/sonunda tırnak, boşluk veya fazladan kelime olabilir.
+      Adres <code>postgresql://</code> ile başlamalı, sonunda <code>?sslmode=require</code> olmalı.`;
+  } else if (h && (h.hasSpaces || h.hasQuotes)) {
+    sorun = `<b>Adreste boşluk veya tırnak işareti var.</b> Değeri baştan sona tekrar kopyala-yapıştır yap
+      (başında/sonunda boşluk, <code>"</code> veya <code>'</code> olmasın).`;
+  } else if (dbError) {
+    sorun = `<b>Veritabanına bağlanılamadı.</b><br><code>${dbError}</code><br>
+      En sık sebep: şifre/adres yanlış kopyalanmış ya da adresin sonunda <code>?sslmode=require</code> eksik.
+      Neon panelinde <b>Connect</b> → <b>Connection string</b> ile yeniden kopyala.`;
+  } else if (!ok) {
+    sorun = 'Bağlantı denemesi sürüyor… 10 saniye sonra yenile.';
+  }
+
+  return `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Yerel Dedikodu — Sistem Kontrolü</title>
+<style>
+ body{margin:0;background:#08080c;color:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px}
+ .wrap{max-width:640px;margin:0 auto}
+ h1{font-size:20px;margin:0 0 4px}
+ .sub{color:#8b8b9e;font-size:13px;margin-bottom:20px}
+ .card{border-radius:18px;padding:20px;margin-bottom:14px;background:#12121a;border:1px solid rgba(255,255,255,.09)}
+ .big{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
+ .ok{background:linear-gradient(135deg,rgba(46,230,168,.16),rgba(46,230,168,.04));border-color:rgba(46,230,168,.5)}
+ .ok .big{color:#2ee6a8}
+ .bad{background:linear-gradient(135deg,rgba(254,44,85,.16),rgba(254,44,85,.04));border-color:rgba(254,44,85,.5)}
+ .bad .big{color:#fe2c55}
+ .fix{margin-top:14px;font-size:14px;line-height:1.65;color:#e6e6f0}
+ .fix code{background:#1d1d28;padding:2px 6px;border-radius:6px;font-size:12.5px;color:#25f4ee}
+ table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+ td{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#b9b9c9}
+ td:first-child{width:45%;color:#8b8b9e}
+ code{background:#1d1d28;padding:2px 6px;border-radius:6px;font-size:12.5px;color:#25f4ee;word-break:break-all}
+ .btn{display:inline-block;margin-top:8px;background:linear-gradient(135deg,#fe2c55,#ff5c7a);color:#fff;text-decoration:none;
+      padding:12px 20px;border-radius:12px;font-weight:800;font-size:14px}
+ .muted{color:#6a6a7e;font-size:12px;margin-top:10px;line-height:1.6}
+ .pill{font-size:11px;background:rgba(255,255,255,.08);padding:3px 9px;border-radius:999px;color:#c9c9d6;font-weight:600}
+</style></head><body><div class="wrap">
+ <h1>💬 Yerel Dedikodu — Sistem Kontrolü</h1>
+ <div class="sub">Bu sayfa sohbet geçmişinin kalıcı olup olmadığını gösterir.</div>
+
+ <div class="card ${ok ? 'ok' : 'bad'}">
+   <div class="big">${ok ? '✅ Sohbetler KALICI' : '❌ Veritabanı bağlı değil'}</div>
+   <div class="fix">
+     ${ok
+       ? 'Mesajlar PostgreSQL veritabanına kaydediliyor. Sunucu yeniden başlasa, uykuya dalsa veya yeni sürüm yüklense bile <b>hiçbir mesaj silinmez</b>.'
+       : sorun}
+   </div>
+   ${ok ? '' : '<a class="btn" href="/dbtest">🔍 Bağlantıyı test et</a>'}
+ </div>
+
+ <div class="card">
+   <div class="big" style="font-size:15px;color:#c9c9d6">📊 Durum</div>
+   <table>
+     <tr><td>Depolama</td><td><code>${storageMode}</code> ${ok ? '<span class="pill">kalıcı</span>' : '<span class="pill">geçici</span>'}</td></tr>
+     <tr><td>Sunucu çalışma süresi</td><td><code>${Math.round(process.uptime())} sn</code></td></tr>
+     <tr><td>Kullanıcı / mesaj / DM</td><td><code>${Object.keys(db.users).length} / ${db.global.length} / ${Object.keys(db.dms).length}</code></td></tr>
+     <tr><td>DATABASE_URL bulundu mu</td><td><code>${hasUrl ? 'EVET' : 'HAYIR'}</code></td></tr>
+     ${dbError ? `<tr><td>Son hata</td><td><code style="color:#ff8fa3">${dbError}</code></td></tr>` : ''}
+   </table>
+ </div>
+
+ ${h ? `<div class="card">
+   <div class="big" style="font-size:15px;color:#c9c9d6">🔐 Adres kontrolü <span class="pill">şifre gizli</span></div>
+   <table>${rows({ baslangic: h.startsWith, uzunluk: h.length + ' karakter', kullanici: h.user, sifre: h.password, sunucu: h.host, port: h.port, veritabani: h.database, sslmode: h.sslmode, bosluk_var: h.hasSpaces ? 'EVET (sorun!)' : 'hayır', tirnak_var: h.hasQuotes ? 'EVET (sorun!)' : 'hayır' })}</table>
+   <div class="muted">Şifre asla gösterilmez. Bu sayfayı ekran görüntüsü olarak paylaşabilirsin, güvenlidir.</div>
+ </div>` : ''}
+
+ <div class="card">
+   <div class="big" style="font-size:15px;color:#c9c9d6">📖 Ne yapmalıyım?</div>
+   <div class="fix" style="font-size:13.5px">
+     <b>1.</b> Neon.com → projen → <b>Connect</b> → Connection string'i kopyala<br>
+     <b>2.</b> Render.com → servis → <b>Environment</b> → <code>DATABASE_URL</code> satırına yapıştır<br>
+     <b>3.</b> <b>Save Changes</b> → deploy bitene kadar bekle (1-2 dk)<br>
+     <b>4.</b> Bu sayfayı yenile → yeşil kutuyu gör
+   </div>
+   <div class="muted">Adres şu şekilde olmalı: <code>postgresql://kullanici:sifre@ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require</code></div>
+ </div>
+</div></body></html>`;
+}
+
+app.get('/kontrol', (_req, res) => res.type('html').send(kontrolHtml()));
+
 /* ------------------------------------------------------------------ */
 /*  HTTP                                                              */
 /* ------------------------------------------------------------------ */
@@ -362,14 +498,40 @@ io.on('connection', (socket) => {
 app.get('/health', (_req, res) =>
   res.json({
     ok: true,
-    uptime: process.uptime(),
+    uptime: Math.round(process.uptime()),
     storage: storageMode,               // 'postgres' → geçmiş kalıcı
     persistent: storageMode === 'postgres',
     users: Object.keys(db.users).length,
     messages: db.global.length,
     threads: Object.keys(db.dms).length,
+    // ---- teşhis (şifre asla gösterilmez) ----
+    dbUrlFound: !!process.env.DATABASE_URL,
+    dbUrl: maskUrl(process.env.DATABASE_URL),
+    dbError: dbError,
+    node: process.version,
   })
 );
+
+// canlı veritabanı testi: gerçekten yazıp okuyor mu?
+app.get('/dbtest', async (_req, res) => {
+  if (!process.env.DATABASE_URL) {
+    return res.status(400).json({ ok: false, problem: 'DATABASE_URL tanımlı değil (Environment değişkeni eklenmemiş/kaydedilmemiş)' });
+  }
+  try {
+    const { Pool } = require('pg');
+    const useSSL = String(process.env.PGSSL || '').toLowerCase() !== 'disable';
+    const p = new Pool({ connectionString: process.env.DATABASE_URL, ssl: useSSL ? { rejectUnauthorized: false } : false, connectionTimeoutMillis: 15000, max: 1 });
+    const t0 = Date.now();
+    const v = await p.query('SELECT version() AS v, now() AS t');
+    await p.query('CREATE TABLE IF NOT EXISTS yd_probe (id int PRIMARY KEY, note text)');
+    await p.query("INSERT INTO yd_probe (id, note) VALUES (1, 'ok') ON CONFLICT (id) DO UPDATE SET note = 'ok'");
+    const r = await p.query('SELECT note FROM yd_probe WHERE id = 1');
+    await p.end();
+    res.json({ ok: true, ms: Date.now() - t0, postgres: String(v.rows[0].v).slice(0, 40), writeRead: r.rows[0].note, host: maskUrl(process.env.DATABASE_URL).host });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message, code: e.code, dbUrl: maskUrl(process.env.DATABASE_URL) });
+  }
+});
 
 initStorage().then(() => {
   server.listen(PORT, '0.0.0.0', () => {
